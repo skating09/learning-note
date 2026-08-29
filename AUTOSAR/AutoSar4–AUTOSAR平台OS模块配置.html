@@ -1,0 +1,51 @@
+<html><head><meta charset='utf-8'></head><body><div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-a50b13a894.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-dark" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p><a href="https://blog.csdn.net/weixin_45479529/article/details/145633837?sharetype=blogdetail&amp;sharerId=145633837&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">BMS1–BMS基础(硬件电路＋软件配置 原理 + 项目实例)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145689852?spm=1001.2014.3001.5501">BMS2–BMS底软HVIL (硬件电路＋软件配置 原理 + 项目实例)[万字图解 含ADC PWM Port配置及原理详解]</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/148279081?spm=1011.2124.3001.6209">BMS3–BMS充电管理(国标+原理+项目)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145686720?sharetype=blogdetail&amp;sharerId=145686720&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar1–先导篇 AutoSar 模块及分层开发活动详解</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156234198?sharetype=blogdetail&amp;sharerId=156234198&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar2–BMS编译调试工具介绍</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158701950?spm=1011.2124.3001.6209">AutoSar3–Polyspace 代码常犯错误汇总</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156363653?sharetype=blogdetail&amp;sharerId=156363653&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar4–AUTOSAR平台OS模块配置</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158845555?sharetype=blogdetail&amp;sharerId=158845555&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar5–CAN通信栈(Can通讯原理+配置+实战项目需求)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158930522?sharetype=blogdetail&amp;sharerId=158930522&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">动力总成1 OBC DCDC(万字原理+BMS VCU交互+国标详解)</a></p>
+<p></p>
+<div class="toc">
+<h4>秒懂 AUTOSAR平台OS模块配置</h4>
+<ul><li><a href="#AUTOSAR43_15">一、AUTOSAR4.3平台介绍</a></li><li><ul><li><a href="#1OS_16">1.OS模块介绍</a></li><li><a href="#2_OsTask_26">2. OsTask</a></li><li><a href="#3_OsISR_44">3. OsISR</a></li><li><a href="#4_Protection_Hook__Memory_Protection_49">4.保护机制 (Protection Hook / Memory Protection)</a></li></ul>
+</li><li><a href="#AUTOSAR43OS_53">二、AUTOSAR4.3平台OS模块配置</a></li><li><ul><li><a href="#1Os_55">（1）Os通用配置</a></li><li><a href="#2OsApplication_60">（2）配置OsApplication</a></li><li><a href="#3OsCore_67">（3）配置OsCore</a></li><li><a href="#4OsCounter_72">（4）配置OsCounter</a></li><li><a href="#5OsTask_76">（5）配置OsTask</a></li><li><a href="#6OsIsr_80">（6）配置OsIsr</a></li><li><a href="#7MPU_83">（7）配置MPU</a></li><li><a href="#8RteTaskMapping_85">（8）配置RteTaskMapping</a></li></ul>
+</li></ul>
+</div>
+<p></p>
+<h2><a id="AUTOSAR43_15"></a>一、AUTOSAR4.3平台介绍</h2>
+<h3><a id="1OS_16"></a>1.OS模块介绍</h3>
+<ol><li>OsApplication<br/> 定义： OsApplication是AUTOSAR OS中一个资源隔离的容器或执行分区。<br/> 核心思想： 将一组相关的任务、中断、警报器和资源组合在一起，形成一个独立的、受保护的执行单元。</li></ol>
+<p>OS-Application有两类：<br/> (1)受信任的操作系统应用程序允许在运行时禁用监控或保护功能。它们可以不受限制地访问内存、操作系统模块的API，并且不需要在运行时强制执行它们的计时行为。当处理器支持时，它们被允许在特权模式下运行。</p>
+<p>(2)不受信任的操作系统应用程序不允许在运行时禁用监控或保护功能。它们限制了对内存的访问，限制了对操作系统模块API的访问。当处理器支持时，它们不允许以特权模式运行。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/5eda6ee8c1344ef58414858c21ca4314.png"/></p>
+<h3><a id="2_OsTask_26"></a>2. OsTask</h3>
+<p>OsTask分为两类：<br/> 基本任务 (Basic Task):<br/> 状态： 只有运行、就绪、挂起三种状态。<br/> 行为： 一旦开始执行，必须运行到完成（不能主动等待事件），只能被更高优先级的任务或中断抢占。</p>
+<p>扩展任务 (Extended Task):<br/> 状态： 拥有运行、就绪、挂起、等待四种状态。<br/> 行为： 关键多了等待(Waiting) 状态。可以在运行时主动等待事件(WaitEvent)，从而自愿放弃CPU。<br/> 两种调度策略 (Scheduling Policy) ：<br/> 固定优先级调度 (NON Scheduling):<br/> 每个任务都有一个在配置时确定的、固定不变的优先级。当任务开始执行，无法被其他任务抢占。</p>
+<p>全抢占式调度 (FULL Scheduling):<br/> 核心规则： 任何时刻，处于就绪状态的最高优先级任务获得CPU执行权。<br/> 抢占： 如果一个高优先级任务变为就绪状态（例如，因为一个事件发生或时间到），它会立即抢占当前正在运行的低优先级任务。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/44403fc558d84de59b055bc722d52a63.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/184b3fd62b074a4a82dde7bb2d5250c9.png"/></p>
+<h3><a id="3_OsISR_44"></a>3. OsISR</h3>
+<p>1类中断 (Category 1 ISR): 由中断向量表直接进入用户中断服务函数，不能调用任何OS API（如ActivateTask, SetEvent）。 通常用于简单的标志位清零或数据读取。</p>
+<p>2类中断 (Category 2 ISR): 更像一个高优先级任务。 可以调用OS API（如ActivateTask, SetEvent, ReleaseResource），从而唤醒其他任务来处理中断事件。</p>
+<h3><a id="4_Protection_Hook__Memory_Protection_49"></a>4.保护机制 (Protection Hook / Memory Protection)</h3>
+<p>目的： 在内存管理单元 (MMU) 或内存保护单元 (MPU) 的硬件支持下，实现空间隔离。<br/> 工作原理：OS与硬件协作，为不同的应用分区或任务组配置不同的内存访问权限（可读、可写、可执行）。如果一个任务试图访问其权限之外的内存（例如，错误的指针操作），MPU/MMU会触发一个异常，OS会处理这个错误（例如，终止该任务）。</p>
+<h2><a id="AUTOSAR43OS_53"></a>二、AUTOSAR4.3平台OS模块配置</h2>
+<h3><a id="1Os_55"></a>（1）Os通用配置</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/2d132c4fe73f42239bc5d6c67e433e62.png"/><br/> <strong>Os关联的Brs配置</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/7d91880548cf4284b3278ba2209d5927.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/0448e4892e654810bd7459194b9e5574.png"/></p>
+<h3><a id="2OsApplication_60"></a>（2）配置OsApplication</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/1f0028559ab24ab488747bcb376dd8e6.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/4913b4ab31a74448b6d68aef7c577f5b.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/af94984e6a5d4e64864aefd350b87d9f.png"/><br/> 配置OsApplication对应的EcucPartition<img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/11531bafb6684a54959fb2b4f1eab0eb.png"/><br/> EcuM关联对应的Partition<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/bbe39d98e82549cfb40e4366ce2900fd.png"/></p>
+<h3><a id="3OsCore_67"></a>（3）配置OsCore</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/40a61bae768943b6be4bacd6e92887b1.png"/><br/> StartLabel配置<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a6f4536ae1b84ead9f99b9e86af73733.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/d15f189d14de49818a1e53373826d11e.png"/></p>
+<h3><a id="4OsCounter_72"></a>（4）配置OsCounter</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ca2a0ea8658a414aa041ea611a49dff6.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a0d7daba7ef44b66b414e750d0618853.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a40591bb6cfe4f958f19e14b478f7ecf.png"/></p>
+<h3><a id="5OsTask_76"></a>（5）配置OsTask</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/c664a8e6e5bd4cdbafac6f2742f73094.png"/><br/> Note: 优先级配置的数字越大，优先级越高<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/88d1b9a49b2b44349b230f5b3364bf9c.png"/></p>
+<h3><a id="6OsIsr_80"></a>（6）配置OsIsr</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/25736f981e7143899ae2aadfb22521fd.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/6d68498c2fee4ff98b9655de2e60608d.png"/></p>
+<h3><a id="7MPU_83"></a>（7）配置MPU</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/6be9e195c563437fb1eba6d93438ab26.png"/></p>
+<h3><a id="8RteTaskMapping_85"></a>（8）配置RteTaskMapping</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/7dd46aeeda504a059ade39c6bf3c921c.png"/><br/> （8）vLinkGen添加地址段<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/6859bfd10d904cdbae8d2c620e8e593d.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/1cfb9fb14aeb495580e547418f73d815.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/6cf08c12a1b24ce1876adff5e8b1c6bf.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/835a7b44b8e8448cbb2b3e0a088fada0.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a53699573ccf4ce18e1a4cf188a7c57e.png"/></p>
+</div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-e1cc28b339.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-d1e89cace4.css" rel="stylesheet"/>
+</div></body></html>

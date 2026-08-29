@@ -1,0 +1,79 @@
+<html><head><meta charset='utf-8'></head><body><div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-a50b13a894.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-dark" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p><a href="https://blog.csdn.net/weixin_45479529/article/details/145633837?sharetype=blogdetail&amp;sharerId=145633837&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">BMS1–BMS基础(硬件电路＋软件配置 原理 + 项目实例)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145689852?spm=1001.2014.3001.5501">BMS2–BMS底软HVIL (硬件电路＋软件配置 原理 + 项目实例)[万字图解 含ADC PWM Port配置及原理详解]</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/148279081?spm=1011.2124.3001.6209">BMS3–BMS充电管理(国标+原理+项目)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145686720?sharetype=blogdetail&amp;sharerId=145686720&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar1–先导篇 AutoSar 模块及分层开发活动详解</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156234198?sharetype=blogdetail&amp;sharerId=156234198&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar2–BMS编译调试工具介绍</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158701950?spm=1011.2124.3001.6209">AutoSar3–Polyspace 代码常犯错误汇总</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156363653?sharetype=blogdetail&amp;sharerId=156363653&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar4–AUTOSAR平台OS模块配置</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158845555?sharetype=blogdetail&amp;sharerId=158845555&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar5–CAN通信栈(Can通讯原理+配置+实战项目需求)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158930522?sharetype=blogdetail&amp;sharerId=158930522&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">动力总成1 OBC DCDC(万字原理+BMS VCU交互+国标详解)</a></p>
+<p></p>
+<div class="toc">
+<h4>秒懂 应用层充电管理</h4>
+<ul><li><a href="#_13">一、快慢充管理引言及原理</a></li><li><ul><li><a href="#AC_14">AC慢充</a></li><li><a href="#DC_25">DC快充</a></li><li><ul><li><a href="#_26">快充连接原理</a></li><li><a href="#2015_32">快充2015物理连接控制过程</a></li><li><a href="#_62">快充交互过程</a></li><li><a href="#GBT279302015CAN_125">快充GB/T27930-2015协议交互CAN报文详解</a></li><li><ul><li><a href="#_126">报文代码分类解析</a></li><li><a href="#_159">充电协议</a></li></ul>
+</li><li><a href="#_175">总结</a></li><li><ul><li><a href="#1_176">1物理连接和唤醒阶段</a></li><li><a href="#2_184">2充电模式判断</a></li></ul>
+</li></ul>
+</li></ul>
+</li><li><a href="#ing_204">二、应用层实现及设计注意点(持续更新ing)</a></li></ul>
+</div>
+<p></p>
+<h2><a id="_13"></a>一、快慢充管理引言及原理</h2>
+<h3><a id="AC_14"></a>AC慢充</h3>
+<p><strong>GB/T 18487.1-2015 《电动汽车传导充电系统》</strong><br/> <strong>直流</strong>充电系统的握手是根据<strong>国标</strong>要求通过<strong>CAN报文</strong>交互实现的。<strong>交流</strong>充电系统没有通信协议，交流充电桩和车辆之间“握手”是通过<strong>模拟电平</strong>实现的。握手信号包括确认插枪物理连接的 <strong>CC</strong> 信号和充电引导的 <strong>CP</strong> 信号。充电枪枪头内有电阻R4、 RC 和机械开关S3。S3就是用户可以手按的机械开关。按下,表示S3断开。松开，表示S3闭合。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/6970d0bddd9140ee91c38aaeefcfc266.png"/><br/> 模式3使用交流桩进行充电。最常见的连接方式有连接方式 B 和连接方式 C 。连接方式 B 指的是交流枪线可以从交流桩上取出来，方式 C 则是<strong>固定在交流桩上</strong>的，市面上常见的是方式 C 。</p>
+<p><strong>CC连接确认</strong>。车辆端根据该<strong>电压信号</strong>来<strong>判断</strong>充电枪是否完成<strong>物理插接</strong>。国标还赋予了 CC信号一个新的功能，就是通过<strong>阻值</strong>的不同来判断充电线缆的<strong>过电流</strong>能力。<br/> <strong>CP控制引导</strong>。对车辆端 <strong>CP</strong> 信号只<strong>检</strong>测它的<strong>占空比</strong>，得到充电桩的<strong>最大供电电流</strong>能力，并且 S2开关改变 CP 信号的电平。对充电桩而言,只检测 CP 信号的电平,通过 CP 电平判断充电状态。<br/> 交流桩通过图示<strong>检测点1</strong>处的<strong>电平</strong>值来<strong>确认</strong>充电枪是否<strong>连接</strong>完好。在初始状态下，S1接通12V。插枪成功后，车辆端的R1和交流桩里面的R3分压，检测点1处电平值由12V变为9V(有效范围为8.2V~9V)电平后，交流桩将<strong>S1</strong>切换到 <strong>PWM 状态</strong>。<br/> 充电条件满足后，<strong>CC/ CP 电路闭合S2</strong>，车辆端的R2和R3并联，再和交流桩里面的R1串联，通过12V分压，检测点1的 PWM 电平由9V变成6V。交流桩收到<strong>6V PWM</strong> 信号<strong>闭合K1和K2</strong>。通俗地说，这时候电网<strong>开始</strong>给交流桩<strong>供电</strong>。充电过程中,，CC / CP 电路<strong>实时检测 CP 占空比</strong>是否正常。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/1fa216583af34595906ef8c899058429.png"/></p>
+<h3><a id="DC_25"></a>DC快充</h3>
+<h4><a id="_26"></a>快充连接原理</h4>
+<p>直流充电只能使用模式4，并且只能使用连接方式3。控制电路如下图所示<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/aa93a750eec547ec926cdee80490a44b.png"/><br/> 因为是连接方式3，故只有车辆接口。该接口中，有9个端点。<br/>   DC+、DC-是充电回路。PE是共地。S+、S-是CAN通讯接口，A+、A-是低压辅助供电回路。CC1连着检测点1，它位于充电桩一端，CC2连着检测点2，它位于车辆一端。<br/>   K1、K2是直流供电回路接触器，K5、K6是充电回路接触器，K3、K4是低压辅助供电回路接触器。开关S为车辆插头的常闭开关。</p>
+<h4><a id="2015_32"></a>快充2015物理连接控制过程</h4>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/8a48683a720d47f8a51b62d40c769063.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ed4a867efca842769a33c626a9f4cb1e.png"/><br/> S常闭开关</p>
+<p>1、车辆插头与车辆插座<strong>插合</strong>，电子锁时车辆处于不可行驶状态<br/>   2、车辆接口<strong>连接确认</strong><br/>   充电桩监测检<strong>测点1</strong>的电压，检测点1通过<strong>上拉电阻</strong>R1接到U1上，U1电压为<strong>12V</strong>，S为常闭触点。<br/>   当未插枪时，如果按钮S未按下，S闭合，R2接入回路中，R2为1000欧，则检测点1的电压为12x1000/(1000+1000)=6V。如果按钮S按下，S断开，不形成回路，则检测点1的电压为12V。<br/>   当插头插入的过程中，按下按钮S，S断开，R4接入回路，查表可知R1为1000欧，R4为1000欧，故此时R4的分压为12x1000/(1000+1000)=6V，即检测点1的电压为6V。当插头完全插入后，按钮S松开，S闭合，R2和R4共同接入电路，R2为1000欧，故检测点1的电压为12x500/(1000+500)=4V。故当检测点1电压值为4V时，判断车辆接口完全连接。<br/>   <strong>故整个电压变化为：未插枪未按按钮6V-&gt;未插枪按下按钮12V-&gt;正在插枪按下按钮6V-&gt;正在插枪松开按钮4V-&gt;插枪完毕4V。</strong><br/>   3、非车载<strong>充电机自检</strong><br/>   当车辆接口完全连接后，充电桩闭合K3、K4、K1、K2，进行绝缘检测（IMD），检测完毕后，断开IMD、K1、K2，开始周期性发送通信握手报文。如果车辆端需要低压辅助供电，需要等待是否得到低压辅助供电，反之，不需要等待。不管怎样，都要通过检测点2的电压判断车辆接口是否完全连接。检测点2通过上拉电阻R5接到U2上，U2为12V，R5为1000欧，车辆接口未连接时，检测点2的电压为12V，连接后，R3接入电路，R3为1000欧，检测点2的电压为12*1000/(1000+1000)=6V。当监测检测点2的电压为6V时，“车辆控制装置”开始周期性的发送通信握手报文。<br/>   4、<strong>车</strong>充电准备<strong>就绪</strong><br/>   “车辆控制装置”闭合K5、K6，使充电回路导通，注意，此时K1、K2并未闭合，故此时无法充电。当充电桩通过通信报文获取电池电压误差&lt;5%，并且在充电桩最小和最大输出电压之间，则闭合K1、K2，开始充电。<br/>   5、<strong>充电</strong>阶段<br/>   充电阶段的电流并不是一成不变的，“车辆控制装置”会向充电桩实时的发送电池充电需求参数，充电桩会根据需求参数实时的调整充电电压和电流的大小。需要注意的是，在调整电流下降时，如果变化量小于20A，最长在1s内将充电电流调整到和命令一致，如果大于20A，最长在(变化量/20)s内调整完毕。同时，充电桩和车辆会相互发送各自的状态信息，详见GB19370。在充电过程中，车辆应能检测PE断开。<br/>   6、正常条件下<strong>充电结束</strong><br/>   对于车辆端，如果车辆电池充满，或者充电桩发送“中止充电报文”，车辆会周期发送“车辆控制装置中止充电报文”，确认充电电流小于5A后，断开K5、K6。<br/>   对于充电桩端，如果达到设定的充电结束条件，或者车辆发送“终止充电报文”，充电桩会会周期发送“充电桩中止充电报文”，并减小充电电流，当充电电流小于5A，断开K1、K2。<br/>   7、非正常条件下<strong>充电中止</strong><br/>   充电过程中，充电桩出现故障，则向车辆周期发送“充电桩中止充电报文”，并在100ms内断开K1、K2、K3、K4。<br/>   充电过程中，车辆出现故障，则项充电桩周期发送“车辆控制装置中止充电报文”。并在300ms内，断开K5、K6。<br/>   充电过程中，充电桩发生通讯超时，则停止充电，在10s内断开K1、K2、K5、K6。如果发生3次通讯超时，则确认通讯中断，则停止充电，断开K1-K6。<br/>   充电过程中，监测检测点1的电压，如果判断车辆接口由完全连接变为断开，则停止充电，在100ms以内，断开K1-K4。如果判断开关S由闭合变为断开，在50m内将输出电流降至5A或以下。<br/>   充电过程中，充电桩输出电压大于车辆最高允许电压，则充电桩在1s内停止充电，并断开K1-K4。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ba8bc16d78564179b72419c8dcec5d8c.png"/></p>
+<h4><a id="_62"></a>快充交互过程</h4>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/8a48683a720d47f8a51b62d40c769063.png"/><br/> <strong>（1） 物理连接</strong></p>
+<p>整车端BMS进行CC2连接确认，充电机端进行CC1连接确认；</p>
+<p><strong>（2） 低压辅助上电</strong></p>
+<p>就如上图1，一般来讲，用户插枪刷卡后，充电机将闭合K3,K4，提供12V电压信号（A+）,该信号用于唤醒BMS控制器。</p>
+<p><strong>（3）BMS和充电机进行报文握手、报文辨识</strong></p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/fb5ff651c3cf453dbc5097edeca9b86d.png"/></p>
+<p>Step1: 握手（第一次握手）</p>
+<p>(1) 充电机发送握手报文CHM给BMS，顺带将自己的充电协议版本告诉给BMS;（协议版本目前就两种，要么是2011年的老国标协议V1.0，要么是2015年的新国标协议V1.1）</p>
+<p>(2) BMS 也发送握手报文BMS给充电机，并告诉充电机车辆最高允许充电的总电压。</p>
+<p>**Step2:**辨识（该过程可以理解为二次握手确认）</p>
+<p>(1) 双方亲切的握手之后，充电机开始对自己的设备进行自检，这里主要是做绝缘检测，检查下设备会不会漏电，以防启动高压后把周围的人给弄触电了，那麻烦可大了。充电机做完绝缘检测后发送CRM 00（辨识信号报文的第一个字节值为00），告知BMS我做完成绝缘检测了，此后充电机就关闭不再开启绝缘绝缘检测了，后面充电过程由BMS来开启绝缘检测。</p>
+<p>(2) BMS收到充电机的辨识报文CRM00之后，就会给充电机发送BRM辨识报文给充电机，在这里给充电机发送的信息可多。比如：BMS所用通信协议的版本(V1.0/V1.1)、车辆电池的类型、电池系统额定电压、电池系统额定容量、电池生产日期、厂家信息、车辆识别码(VIN)等。</p>
+<p>(3) 充电机收到这些信息之后，就会对这些信息进行分析，决定要不要给你车辆充电，如果没有问题就给BMS回复CRM AA（辨识码的值AA）。也有可能由于信息不匹配，就不让充电然后发错误信息给BMS。其实在这可以做很多特殊的使用场景，比如有些品牌的充电桩和整车厂合作，某个品牌车辆在用这个品牌充电机充电时可以享受VIP待遇，是免费的，其他品牌的车辆是收费的，在这就可以通过车辆识别码(VIN)进行辨识判断。有些车厂可能搞这种营销“买车免费充电”，但实际上他们合作方的充电桩市场占有率太低了，你平时开车都很难找到他们免费的充电桩，哈哈。</p>
+<p><strong>（4）参数配置</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/69a7671d56a14cc2b217abdc33f70b7c.png"/></p>
+<p>（1） 这个阶段，BMS会先通过BCP报文发送更完整的电池参数信息给充电机。包括最大充电电压、最大充电电流、最高允许充电温度、当前的电量、当前的总压等。</p>
+<p>（2） 同时，充电机开始会一直给BMS发送当前时间报文CTS（年/月/日/时/分/秒）和充电机的最大充电能力报文CML（最高输出电压、最低输出电压、最大输出电流、最小输出电流）。</p>
+<p>（3） 同时，BMS给充电机发送准备就绪报文BRO 00（编码值00），表示兄逮等下，我还没准备好。然后BMS闭合快充高压继电器K5/K6，并开启绝缘检测。之后，再发送BRO AA（编码值AA）给充电机，表示自己做好充电准备了。</p>
+<p>（4） 充电机收到BMS发送的BRO AA之后就会发送充电就绪报文CRO 00（编码值00），同样告诉BMS：兄逮，等下，我还没准备好。然后闭合充电机高压继电器K1\K2，之后再发CRO AA(编码值AA)给BMS，表示自己也准备好了。（在此时就完成了前期所有准备工作，其实就是完成车辆的电池高压和充电机输出端的高压并联在一起，艰难吧）。</p>
+<p><strong>（5）充电阶段</strong></p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/e24a1f65c3cb46a6af7e1bc17b1e2c11.png"/></p>
+<p>（1） 进入充电阶段，BMS 给充电机实时发送BCL报文（请求充电电压、请求充电电流、充电模式）。以及BCS报文（内容包括：当前BMS测量的电池总压、测量充电电流、最高单体电压、当前电量SOC、剩余估算充电时间）。整车充电过程中，BMS还会给充电机发送电池的其他状态信息BSM(必须，温度/过压/过流/过温/绝缘等信息)\BMV(可选)\BML(可选)\BSP(可选)等报文，可选表示国标未强制要求（详细单体电压和温度信息），有些BMS厂商有可能不会发送电池详细信息。</p>
+<p>（2） 充电机会根据BMS发送BCL请求电压电流信息进行调整输出并向BMS发送CCS充电状态报文（包含信息：输出电压、输出电流、累计充电时间和允许充电命令）。</p>
+<p>（3） 如果充电过程中BMS检测到满充或故障需要停止充电，则需要向充电机发送BST报文（内容为中止故障原因），充电机收到BST报文后停止输出。同理，充电过程中，充电机检测到故障/人工停止/预设条件需要中止充电时，需向BMS发送CST报文（内容为中止故障原因），BMS收到CST报文后退出充电流程。</p>
+<p><strong>（6）充电结束阶段</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/29b0fdb1e45d4fdda27c30f24f54374d.png"/></p>
+<p>结束充电后，BMS和充电机相互发送这个充电过程的统计数据，就是最后做结算了。</p>
+<p>（1） BMS向充电机发送BSD报文（内容为当前电池的电压、电池温度、当前的电量SOC）.</p>
+<p>（2） 充电机给BMS发送CSD报文（累计充电的时间、充电的电量、充电机的编号）。</p>
+<h4><a id="GBT279302015CAN_125"></a>快充GB/T27930-2015协议交互CAN报文详解</h4>
+<h5><a id="_126"></a>报文代码分类解析</h5>
+<p>1.低压辅助上电及充电握手阶段<br/> CHM——充电机握手<br/> BHM——车辆握手<br/> CRM——充电机辨识<br/> BRM——BMS和车辆辨识报文</p>
+<p>2.充电参数配置阶段<br/> BCP——动力蓄电池充电参数<br/> CTS——充电机发送时间同步信息<br/> CML——充电机最大输出能力<br/> BRO——车辆充电准备就绪状态<br/> CRO——充电机输出准备就绪状态</p>
+<p>3.充电阶段<br/> BCL——电池充电需求<br/> BCS——电池充电总状态<br/> CCS——充电机充电状态<br/> BSM——动力蓄电池状态信息<br/> BMV——单体动力蓄电池电压（V为Voltage电压）<br/> BMT——动力蓄电池温度（T为Temperature温度）<br/> BSP——动力蓄电池预留报文<br/> BST——车辆中止充电<br/> CST——充电机中止充电</p>
+<p>4.充电结束阶段（S是Statistic统计）<br/> BSD——车辆统计数据<br/> CSD——充电机统计数据</p>
+<p>5.错误报文（报文里E代表Error错误）<br/> BEM——BMS 及车辆错误报文<br/> CEM——充电机错误报文<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/dba59f90128e41edb530c5f210a78dee.png"/></p>
+<h5><a id="_159"></a>充电协议</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/63e3584d5d0347a7822dff11e819b381.png"/><br/> 以国标GB／T 27930—2015《电动汽车非车载传导式充电机与电池管理系统之间的通信协议》为基础。<br/> 27930第4、5两部分相当于总的规定，主要如下：<br/> 1.充电机与BMS之间的CAN通信网络应由<strong>充电机和BMS两个节点</strong>组成；<br/> 2.数据信息传输采用<strong>低字节先发</strong>送的格式（J1939规定，采用Intel格式）；<br/> 3.正的电流值代表放电，负的电流值代表充电；<br/> 4.充电机与BMS之间的通信速率为<strong>250kbps</strong>（J1939规定）；</p>
+<p><strong>PDU格式</strong><br/> 据J1939，直流充电协议采用扩展帧。协议数据单元（PDU）就是报文内容，如下表所示，前面P+R+DP+PF+PS+SA可以理解为报文帧ID，DATA就是充电机和BMS的通信内容。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/2a7f05c42c73475587c12d0ed2509464.png"/><br/> PGN：这个很重要对后面CAN协议理解很重要</p>
+<p>国网标准：充电机地址是56H，车辆地址是F4H<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/678418ac0ee741249b42adee11617118.png"/></p>
+<h4><a id="_175"></a>总结</h4>
+<h5><a id="1_176"></a>1物理连接和唤醒阶段</h5>
+<ol><li>连接确认<br/> 检测到CC1=4V、CC2=U2/2（参考GBT 18487.5-202x，以下简称2015+）或CC1=0V CC2=6V（参考GBT 18487.1-2015，以下简称2015）。</li><li>唤醒<br/> CC2检测点电压变为U2/2V、CC1检测点电压变为4V或A+硬线高电平，车辆控制器应立即被唤醒。（CC2和CC1均设计为边沿唤醒）为适配2015充电协议，U2定为12V</li><li>触发车辆处于不可行驶模式<br/> 确认完全连接后，触发车辆处于不可行驶模式，包含充电枪和水冷枪.<br/> 注：CC1检测点电压变为4V后的5s内宜被唤醒，10s内应被唤醒；U2电压为示例，可由车辆制造厂自定义，U2应不超过28 V。本策略为适配2015充电协议，U2=12V。</li></ol>
+<h5><a id="2_184"></a>2充电模式判断</h5>
+<p><strong>①插枪判断</strong><br/> 该阶段BMS决定插枪情况和插枪数量。<br/> （1）2015插枪：BMS检测到任何一个CC1=0V、CC2=6V后，可判断为2015协议（GB/T 20234.3-2015）充电抢插入。延迟90s等待，判断有无另一插枪信号CC1=0V、CC2=6V。若有，判断为双枪充电流程。若无，则按照单枪充电流程进行充电。<br/> （2）2015+充电插枪：BMS检测到任何一个CC1=4V、CC2=6V后，可判断为2015+协议（GB/T 20234.3-2023）充电抢插入。延迟 90s等待，判断有无另一插枪信号CC1=4V、CC2=6V。若有，判断为双枪充电流程。若无，则按照单枪充电流程进行充电。<br/> （3）HW兆瓦充电插枪：BMS检测到任何一个CC1=4V、CC2=2V后，可判断为HW兆瓦充电抢插入。延迟90s等待，判断有无另一插枪信号CC1=4V、CC2=2V。若有，判断为双枪充电流程。若无，则按照单枪充电流程进行充电。在等待过程中，若水冷插枪CC2=6V，则表示水冷枪插入。<br/> （4）异常情况判断：若检测到两个插枪类型不同，则认为故障，不进入充电流程。<br/> <strong>②HW兆瓦充电枪鉴权</strong><br/> 该阶段用于HW兆瓦生态内车辆与HW兆瓦充电机间的身份交互和确认。</p>
+<p>离线模式下,仅执行步骤1,2,7, 且步骤7中的新校验码下发功能不执行. 充电桩收到车端信息后,直接回复生态鉴权成功结果<br/> BMS不一定每次生态鉴权都需要更新校验码,可以根据自己的策略自定义更新校验码的机制.我们的要求是每周至少更新一次.如果重卡车辆超过一周未充电,则本次充电需更新校验码.<br/> <strong>③版本协商</strong><br/> 在确认物理连接完成，通信链路建立之后，双方进行通信协议版本协商，向对方发送己方支持的最高协议版本号（版本的比较即数字的大小比较）并读取对方判断结果，以决定充电机和车辆的通信协议版本。<br/> <strong>④充电模式确认</strong><br/> 基于插枪情况判断、HW兆瓦充电抢鉴权、版本协商，基于以上流程，BMS可进入六种充电模式。若协商结果为2015单枪充电，充电流程按照附件一开展；若协商结果为2015+单枪充电，充电流程按照附件二开展；若协商结果为HW兆瓦枪单枪充电，充电流程按照附件4开展；若协商结果为2015双枪充电，充电流程按照附件5开展；若协商结果为2015+双枪充电，充电流程按照附件6开展；若协商结果为HW兆瓦双枪充电，充电流程按照附件7开展；</p>
+<h2><a id="ing_204"></a>二、应用层实现及设计注意点(持续更新ing)</h2>
+<p>首先根据客户释放的接口需求和流程图及状态跳转策略制定合理的状态机跳转及条件；<br/> 原则上:新变更,新办法。老策略,小优化(调整位置,小改动)；chart内部的Local变量带Loc前缀。模块组合之间不带Loc前缀。约定带Flg,vld的信号,按照boolean类型理解。超过2个coding Valuue的信号命名带Sts。</p>
+</div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-e1cc28b339.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-d1e89cace4.css" rel="stylesheet"/>
+</div></body></html>

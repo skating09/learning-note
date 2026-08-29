@@ -1,0 +1,200 @@
+<html><head><meta charset='utf-8'></head><body><div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-a50b13a894.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-dark" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p><a href="https://blog.csdn.net/weixin_45479529/article/details/145633837?sharetype=blogdetail&amp;sharerId=145633837&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">BMS1–BMS基础(硬件电路＋软件配置 原理 + 项目实例)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145689852?spm=1001.2014.3001.5501">BMS2–BMS底软HVIL (硬件电路＋软件配置 原理 + 项目实例)[万字图解 含ADC PWM Port配置及原理详解]</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/148279081?spm=1011.2124.3001.6209">BMS3–BMS充电管理</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145686720?sharetype=blogdetail&amp;sharerId=145686720&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar1–先导篇 AutoSar 模块及分层开发活动详解</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156234198?sharetype=blogdetail&amp;sharerId=156234198&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar2–BMS编译调试工具介绍</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158701950?spm=1011.2124.3001.6209">AutoSar3–Polyspace 代码常犯错误汇总</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156363653?sharetype=blogdetail&amp;sharerId=156363653&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar4–AUTOSAR平台OS模块配置</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158845555?sharetype=blogdetail&amp;sharerId=158845555&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar5–CAN通信栈(Can通讯原理+配置+实战项目需求)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158930522?sharetype=blogdetail&amp;sharerId=158930522&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">动力总成1 OBC DCDC(万字原理+BMS VCU交互+国标详解)</a></p>
+<p></p>
+<div class="toc">
+<h4>秒懂 HVIL</h4>
+<ul><li><a href="#_13">高压互锁的原理</a></li><li><ul><li><a href="#1_17">1.电气回路检测：</a></li><li><a href="#2_25">2.信号检测与处理：</a></li></ul>
+</li><li><a href="#_31">高压互锁的作用</a></li><li><a href="#_35">高压互锁的实现</a></li><li><a href="#_54">实现步骤</a></li><li><ul><li><a href="#_55">硬件设计：</a></li><li><ul><li><a href="#_81">硬件电路设计方案</a></li><li><ul><li><a href="#_89">直流源</a></li><li><a href="#PWM_100">PWM</a></li></ul>
+</li></ul>
+</li><li><a href="#_104">软件详解及配置：</a></li><li><ul><li><a href="#1MCALPWMADCGPIO_106">1.配置MCAL的PWM、ADC和GPIO驱动</a></li><li><a href="#PWM_120">详解PWM</a></li><li><ul><li><a href="#2PWM_121">2.PWM模块详解：</a></li><li><a href="#21PWM_122">2.1PWM模块概念介绍</a></li><li><a href="#22_PWM_134">2.2 PWM依赖的模块</a></li><li><a href="#23_PWM_141">2.3 PWM频率</a></li><li><a href="#24_PWM_159">2.4 PWM占空比</a></li><li><a href="#24_PWM_163">2.4 PWM重要数据类型</a></li><li><ul><li><a href="#241_Pwm_EdgeNotificationType_164">2.4.1 Pwm_EdgeNotificationType</a></li><li><a href="#242_Pwm_ChannelClassType_168">2.4.2 Pwm_ChannelClassType</a></li></ul>
+</li><li><a href="#25_PWMAPI_181">2.5 PWM重要API</a></li><li><ul><li><a href="#251_Pwm_Init_182">2.5.1 Pwm_Init</a></li><li><a href="#252_Pwm_SetPeriodAndDuty_186">2.5.2 ==Pwm_SetPeriodAndDuty==</a></li><li><a href="#253_Pwm_EnableNotification_192">2.5.3 Pwm_EnableNotification</a></li></ul>
+</li></ul>
+</li><li><a href="#3TC3xxPWM_196">3.基于英飞凌TC3xx芯片的PWM配置实践</a></li><li><ul><li><a href="#31Port_197">3.1.配置Port引脚</a></li><li><a href="#32_TOM_205">3.2 配置TOM通道</a></li><li><ul><li><a href="#TOM_214">TOM通道的关键寄存器</a></li><li><a href="#PWM_239">配置示例：生成PWM信号</a></li></ul>
+</li><li><a href="#33_PWM_292">3.3 配置PWM模块</a></li><li><ul><li><a href="#331PWMGTM_293">3.3.1PWM引用GTM通道配置</a></li><li><a href="#332PwmNotification_297">3.3.2PwmNotification</a></li><li><a href="#333PwmChannelClass_299">3.3.3PwmChannelClass</a></li><li><a href="#334_General_305">3.3.4 General</a></li><li><a href="#34ResourceM_318">3.4配置ResourceM</a></li></ul>
+</li></ul>
+</li><li><a href="#4_RH850U2APWM_323">4. 基于RH850U2A芯片的PWM配置实践</a></li><li><ul><li><a href="#41_Port_328">4.1 配置Port口</a></li><li><a href="#42_PWM_332">4.2 PWM通用项配置</a></li><li><a href="#43__336">4.3 配置可用服务</a></li><li><a href="#44_PWM_340">4.4 配置PWM输出需要的时钟</a></li><li><a href="#45_PWM_344">4.5 配置PWM通道</a></li></ul>
+</li><li><a href="#5__345">5. 总结</a></li></ul>
+</li><li><a href="#ECUHVIL_353">ECU抽象层HVIL软件实现：</a></li><li><ul><li><a href="#1_355">1.明确软件需求</a></li><li><a href="#2_365">2.软件设计</a></li></ul>
+</li></ul>
+</li><li><a href="#_375">高压互锁故障</a></li><li><ul><li><a href="#_376">开路故障</a></li><li><a href="#_384">短电源故障</a></li><li><a href="#_391">短地故障</a></li><li><a href="#_395">其他常见故障：</a></li></ul>
+</li></ul>
+</div>
+<p></p>
+<h2><a id="_13"></a>高压互锁的原理</h2>
+<p>在AUTOSAR架构下，高压互锁（High Voltage Interlock, HVIL）是一种安全机制，用于<strong>检测</strong>高压系统中的<strong>电气连接状态</strong>，确保高压电路在断开或异常时能够及时切断电源，防止电击或设备损坏。</p>
+<h3><a id="1_17"></a>1.电气回路检测：</h3>
+<p>HVIL通过一个<mark>低电压的检测回路监控高压连接器的状态</mark>。该回路贯穿所有高压组件，形成一个闭合电路。</p>
+<p>当所有连接器正常连接时，回路闭合，系统正常工作。</p>
+<p>如果某个连接器断开或松动，回路断开，系统检测到异常并触发保护措施。</p>
+<h3><a id="2_25"></a>2.信号检测与处理：</h3>
+<p>HVIL回路中的信号由控制单元（如BMS）监控，实时检测回路状态。</p>
+<p>如果检测到回路断开，控制单元会触发故障处理机制，如切断高压电源或报警。</p>
+<h2><a id="_31"></a>高压互锁的作用</h2>
+<p>车辆上电前，检测电路完整性，如果检测到电路不完整，系统无法上电，避免因虚接等问题造成事故；<br/> 检测高压电路松动（会导致高压断电、车辆动力丧失、影响乘车安全），并在高压断电前向车辆控制器提供报警信息，预留车辆系统采取对策的时间。<br/> 在维修整车高压电路时，可通过MSD(手动维修开关)手动断开高压，高压互锁先断开，然后再断开高压互锁回路，防止误操作导致高压上电，威胁维修人员安全。</p>
+<h2><a id="_35"></a>高压互锁的实现</h2>
+<p>在AUTOSAR架构下，HVIL的实现涉及以下模块：</p>
+<ol><li> <p>硬件层：<br/> HVIL回路：贯穿所有高压组件，形成闭合电路。<br/> 传感器与检测电路：用于检测回路状态，并将信号传递给控制单元。</p> </li><li> <p><strong>微控制器抽象层（MCAL）</strong>：<br/> <mark>ADC驱动</mark>：读取HVIL回路的电压信号。<br/> <mark>GPIO驱动</mark>：控制相关引脚状态，如切断高压电源。</p> </li><li> <p>ECU抽象层：<br/> HVIL信号处理模块：将MCAL层读取的信号转换为逻辑状态，供上层使用。</p> </li><li> <p>服务层：<br/> 诊断事件管理（DEM）：记录HVIL相关故障。<br/> 诊断通信管理（DCM）：通过CAN或其他通信协议上报故障信息。</p> </li><li> <p>应用层：<br/> HVIL监控模块：实时监控HVIL回路状态，触发保护措施。<br/> 故障处理模块：根据HVIL状态执行相应操作，如切断电源或报警。</p> </li></ol>
+<h2><a id="_54"></a>实现步骤</h2>
+<h3><a id="_55"></a>硬件设计：</h3>
+<p>设计HVIL回路，确保其贯穿所有高压组件。<br/> 选择合适的传感器和检测电路。</p>
+<p>高压互锁连接器实物图：<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/187d2d790b5841ee82595e501a82a5d4.png"/></p>
+<p>高压互锁硬件功能<mark>实质</mark>是<strong>检测</strong>互锁端子两个<strong>PIN脚通断</strong>来实现。</p>
+<p>如下图所示：<br/> 实现高压互锁结构的一般方法是将一对低压连接器和一对高压连接器固定在一对公端和母端上。</p>
+<p>通过互锁端子与主电路(高压)端子的长度和位置差异，接口在插入或拔出时有时间先后；</p>
+<p>在插入时，高压端子比低压端子（互锁端子）较长，所以高压端子连接；即：检测到低压端子连接时，高压端子一定连接；<br/> 在拨出时，低压端子断开时，高压端子可能断开也可能未断开（接触不良），但是此时是不安全的，所以当检测到低压端子断开时，就断开高压。</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/0427db257f434026b426b78036369c22.png"/></p>
+<p>硬件原理概述：<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/2028f9bffeeb494f8f00f21fffbb23bd.png"/></p>
+<h4><a id="_81"></a>硬件电路设计方案</h4>
+<p>高压连接器的HVIL检测电路有<strong>直流源</strong>与<strong>PWM</strong>两种方案</p>
+<p>动作说明：</p>
+<p>IC对外输出恒定电流，并采集输出端电压（HVILn_OUT_AD）；<br/> 接收端检测从外部流回的电流，并采集该电流在电阻上产生电压（HVILn_IN_AD）。<br/> MCU通过AD采集到的电压判断输出状态。</p>
+<h5><a id="_89"></a>直流源</h5>
+<p>检测高压互锁回路完整性，可以通过在BMS一端输出直流电流，在另一端输入形成回路，检测输出和输入点的电压，判断是否在一个阈值内，从而判断高压互锁回路是否开路或松动。</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/699401f6ce664d60a0a82d160ae9ca01.png"/></p>
+<h5><a id="PWM_100"></a>PWM</h5>
+<p>BMS发出PWM波，经过各个高压互锁连接器，最后再回到BMS；BMS检测接收到的信号，比如PWM波信号的占空比来判断高压互锁回路的完整性<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/9eb8b79d329f41718f9a173d0ebf9079.png"/><br/> 电池厂商项目大多使用PWM实现HVIL方法，使用PWM方式则不会像直流源方法导致HVIL功能失效。</p>
+<h3><a id="_104"></a>软件详解及配置：</h3>
+<h4><a id="1MCALPWMADCGPIO_106"></a>1.配置MCAL的PWM、ADC和GPIO驱动</h4>
+<p>MCAL驱动主要分为IO类驱动（DIO等）、通讯类驱动（CAN等）、内存类驱动（EEP等）、微控制器驱动（GPT等），根据使用个人使用经验，MCU模块（需要结合具体芯片的硬件时钟配置个软件模块使用的时钟）和SPI模块（需要结合外围芯片的SPI通信振格式及时序要求来配置）的配置是难点，后面将详细讲解。<br/> ADC驱动：Analog-to- Digital Converter Driver<br/> CAN驱动：Controller Area Network Driver<br/> DIO驱动：Digital Input/Output Driver<br/> ETH驱动：Ethernet Driver<br/> GPT驱动：General Purpose Timer Driver<br/> ICU驱动：Input Capture Unit Driver<br/> LIN驱动：Local Interconnect Network Driver<br/> MCU 驱动：Microcontroller Unit Driver<br/> PORT驱动：Port Driver<br/> PWM驱动：Pulse Width Modulation Driver<br/> SPI 驱动：Serial Peripheral Interface</p>
+<h4><a id="PWM_120"></a>详解PWM</h4>
+<h5><a id="2PWM_121"></a>2.PWM模块详解：</h5>
+<h5><a id="21PWM_122"></a>2.1PWM模块概念介绍</h5>
+<p>PWM驱动提供初始化和控制MCU内部PWM状态（脉冲宽度调制）的功能。PWM驱动模块可以产生可变的脉冲宽度。它允许选择占空比和信号周期时间。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/52f93d0a079f419c9b504f1c25cb5974.jpeg"/></p>
+<p>图1：PWM信号描述<br/> Polarity：极性，也就是PWM脉冲开始的电平状态，如果我们的空闲状态配置（Idle State）为低电平，则极性Polarity就为高电平。<br/> Idle State：空闲状态，也就是没有PWM脉冲输出时的状态。<br/> Duty Cycle：占空比周期，也就是一个PWM处于Polarity状态的时间。<br/> Period：周期，Duty Cycle 加一个空闲状态的时间。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/0f8eb4a68d484f8ea9b1a88a05aa9cce.jpeg"/></p>
+<p>表1：PWM关键概念</p>
+<h5><a id="22_PWM_134"></a>2.2 PWM依赖的模块</h5>
+<p>PWM依赖于于系统时钟。因此，系统时钟的改变（PLL on --&gt; PLL off）会影响PWM硬件的设置。<br/> PWM驱动依赖以下的模块：<br/> – PORT Driver: 设置Port pin的功能（port pin一般都是复用的）<br/> – MCU Driver: 设置预分频器，系统时钟和锁相环<br/> – DET: 默认的Error追踪<br/> <em>Note: 配置PWM模块前要保证MCU模式时钟及PORT模块的Pin脚属性配置正确，详见Mcu和Port配置介绍。</em></p>
+<h5><a id="23_PWM_141"></a>2.3 PWM频率</h5>
+<p>PWM模块的所有API服务都是使用<strong>Ticks数</strong>作为<strong>时间单元</strong>。Ticks使用的基准时钟由Mcu模块的配置（如PCLK），PWM模块可以对<strong>基准时钟进行再分频</strong>配置得到想到的Tick时钟。<br/> Ticks数和时间的转换必须在应用层完成。<br/> 例如：如果项目使用的PWM通道的Tick需求都是1us，我们要得到1000Hz的频率，那么需要设置Period参数为1000（1/（1000 * 10^-6））。<br/> void PWM_SetPeriodAndDuty(</p>
+<pre><code class="prism language-c">
+   <span class="token number">3.</span>  PWM_ChannelType ChannelNumber<span class="token punctuation">,</span>
+    
+   <span class="token number">5.</span>  PWM_PeriodType Period<span class="token punctuation">,</span>
+    
+   <span class="token number">7.</span>  uint16 DutyCycle
+    
+   <span class="token number">9.</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h5><a id="24_PWM_159"></a>2.4 PWM占空比</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/15b3c546bf98414398fabb4404e00e73.jpeg"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/47645339d2cb48a981cd905c0b7cc9d6.jpeg"/><br/> 0x00–0x8000表示占空比0%–100%，所以我们要配置占空比50%，则DutyCycle参数应配置为0x4000。</p>
+<h5><a id="24_PWM_163"></a>2.4 PWM重要数据类型</h5>
+<h6><a id="241_Pwm_EdgeNotificationType_164"></a>2.4.1 Pwm_EdgeNotificationType</h6>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/f41d02c47c6844bc8e2b9b8d2b6da6e5.jpeg"/><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/f07e9d2f9e6a4798b9e9edce8df96a29.jpeg"/></p>
+<p>PWM_EdgeNotificationType配置是上升沿、下降沿还是双边沿调用通知函数（Notification，需要配置）。</p>
+<h6><a id="242_Pwm_ChannelClassType_168"></a>2.4.2 Pwm_ChannelClassType</h6>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/5579e36cd9cc4224814a0658533f0927.jpeg"/></p>
+<p>PWM_ChannelClassType配置PWM输出的模式：<br/> <strong>PWM_VARIABLE_PERIOD</strong> ：周期（频率）和占空比都可改变<br/> <strong>PWM_FIXED_PERIOD</strong> ：固定周期（频率），占空比可改变<br/> <strong>PWM_FIXED_PERIOD_SHIFTED</strong> ：固定周期和占空比。</p>
+<p>必要和可选的配置项：</p>
+<p>PWM对应的硬件<strong>1通道</strong>、<strong>2默认周期</strong>、<strong>3默认Duty cycle</strong>、<strong>4极性</strong>、<strong>5空闲状态</strong>、<strong>6通道类型</strong>是必须的配置项。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/d42b5ba076b944a09116d5dc912980a5.jpeg"/></p>
+<h5><a id="25_PWMAPI_181"></a>2.5 PWM重要API</h5>
+<h6><a id="251_Pwm_Init_182"></a>2.5.1 Pwm_Init</h6>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/5c18d9a82921419f83776a134584c20a.jpeg"/><br/> Pwm_Init函数初始化PWM模块，将所有PWM通道设置为默认状态。</p>
+<h6><a id="252_Pwm_SetPeriodAndDuty_186"></a>2.5.2 <mark>Pwm_SetPeriodAndDuty</mark></h6>
+<p>Pwm_SetPeriodAndDuty函数设置PWM通道的周期和占空比。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/08ea50874af14b4fa6c459b0c31fcbde.jpeg"/><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/192b637f0f564789b54059f34154d89a.jpeg"/><br/> 周期的参数也是Tick数，看配置给这一路PWM输出的时钟Revolution，如果revolution = 1us，则Period = Tick number * 1us。<br/> 如果将Period设置为0，则占空比的设置无效。在这种情况下输出的占空比为0。</p>
+<h6><a id="253_Pwm_EnableNotification_192"></a>2.5.3 Pwm_EnableNotification</h6>
+<p>Pwm_EnableNotification使能PWM的通知功能。如果我们配置PWM通道的Notification函数，同时在使用PWM功能的模块调用了Pwm_EnableNotification使能PWM的通知功能，则PWM的配置边沿（上升沿、下降沿、双边沿）产生中断调用我们配置的Notification函数，一般在需要知道边沿变化的场景下使用。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/7df078a817204ca7b90686b0f521e0e0.jpeg"/></p>
+<h4><a id="3TC3xxPWM_196"></a>3.基于英飞凌TC3xx芯片的PWM配置实践</h4>
+<h5><a id="31Port_197"></a>3.1.配置Port引脚</h5>
+<p><strong>需求 ：</strong> 配置P11.14为PWM输出<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/8128f6a82907461db267d6ba3e5faf42.png"/></p>
+<p>查看&lt;&lt;T********C37xAB_EXT_DS_v1.1.pdf &gt;&gt;文档，找到P11.14引脚的多路复用选项为O1（Output alternative 1）。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/908cf4d046914e3cb3470e57e61c4956.jpeg"/><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/87395a95f01a43239b82a03665398eef.jpeg"/></p>
+<h5><a id="32_TOM_205"></a>3.2 配置TOM通道</h5>
+<p>技术手册扫盲时间^ , ^</p>
+<hr/>
+<p>英飞凌Aurix系列的文档：【GTM_TOUT126】<br/> <strong>GTM</strong>代表Generic Timer Module，Infineon常见模块，用于复杂时间控制如<strong>定时</strong>和<strong>PWM生成</strong>。<br/> <strong>TOM</strong>代表Timer Output Module，是GTM中的一个子模块，负责<strong>生成输出信号</strong>，如PWM波形。<strong>TOUT</strong>是Timer Output的缩写，具体指某个<strong>输出通道</strong>。<br/> GTM_TOUT 通常指 TOM通道的输出信号。</p>
+<p>以英飞凌Aurix系列为例，<strong>配置TOM通道</strong>需要操作以下寄存器：</p>
+<h6><a id="TOM_214"></a>TOM通道的关键寄存器</h6>
+<p><strong>(1) TOM通道控制寄存器（TOMx_CHy_CTRL）</strong><br/> 功能：配置通道的工作模式、时钟源、触发条件等。</p>
+<p>关键字段：</p>
+<p><strong>SL</strong>：选择时钟源（如分频后的系统时钟）。</p>
+<p><strong>TRIGOUT</strong>：触发输出模式（如上升沿触发）。</p>
+<p><strong>CLK_SRC</strong>：时钟源选择（如GPT120定时器时钟）。</p>
+<p><strong>(2) TOM通道周期寄存器（TOMx_CHy_SR0）</strong><br/> 功能：设置PWM的周期（频率）。</p>
+<p>例如，SR0 = (System Clock Frequency) / (PWM Frequency) - 1。</p>
+<p><strong>(3) TOM通道占空比寄存器（TOMx_CHy_SR1）</strong><br/> 功能：设置PWM的占空比。</p>
+<p>例如，占空比 = (SR1 + 1) / (SR0 + 1) * 100%。</p>
+<p><strong>(4) TOM通道输出控制寄存器（TOMx_TGCy_GLB_CTRL）</strong><br/> 功能：全局控制通道的输出使能、同步等。</p>
+<h6><a id="PWM_239"></a>配置示例：生成PWM信号</h6>
+<p>假设需要通过 TOM0通道1 生成一个频率为1kHz、占空比50%的PWM信号（系统时钟为100MHz）。</p>
+<p>步骤1：计算寄存器值<br/> 周期（SR0）：</p>
+<pre><code class="prism language-c">SR0 <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">100</span>MHz <span class="token operator">/</span> <span class="token number">1</span>kHz<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span> <span class="token operator">=</span> <span class="token number">99999</span>
+</code></pre>
+<p>占空比（SR1）：</p>
+<pre><code class="prism language-c">SR1 <span class="token operator">=</span> SR0 <span class="token operator">*</span> <span class="token number">50</span><span class="token operator">%</span> <span class="token operator">=</span> <span class="token number">49999</span>
+</code></pre>
+<p>步骤2：配置寄存器</p>
+<pre><code class="prism language-c"><span class="token comment">// 选择TOM0通道1</span>
+<span class="token keyword">volatile</span> uint32<span class="token operator">*</span> TOM0_CH1_CTRL <span class="token operator">=</span> <span class="token punctuation">(</span>uint32<span class="token operator">*</span><span class="token punctuation">)</span><span class="token number">0xF0002004</span><span class="token punctuation">;</span>  <span class="token comment">// 假设地址为示例</span>
+<span class="token keyword">volatile</span> uint32<span class="token operator">*</span> TOM0_CH1_SR0   <span class="token operator">=</span> <span class="token punctuation">(</span>uint32<span class="token operator">*</span><span class="token punctuation">)</span><span class="token number">0xF0002008</span><span class="token punctuation">;</span>
+<span class="token keyword">volatile</span> uint32<span class="token operator">*</span> TOM0_CH1_SR1   <span class="token operator">=</span> <span class="token punctuation">(</span>uint32<span class="token operator">*</span><span class="token punctuation">)</span><span class="token number">0xF000200C</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 配置时钟源和模式</span>
+<span class="token operator">*</span>TOM0_CH1_CTRL <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">0x1</span> <span class="token operator">&lt;&lt;</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// SL=1（选择分频后的时钟）</span>
+<span class="token operator">*</span>TOM0_CH1_SR0  <span class="token operator">=</span> <span class="token number">99999</span><span class="token punctuation">;</span>       <span class="token comment">// 设置周期</span>
+<span class="token operator">*</span>TOM0_CH1_SR1  <span class="token operator">=</span> <span class="token number">49999</span><span class="token punctuation">;</span>       <span class="token comment">// 设置占空比</span>
+
+<span class="token comment">// 使能通道输出</span>
+<span class="token keyword">volatile</span> uint32<span class="token operator">*</span> TOM0_TGC0_GLB_CTRL <span class="token operator">=</span> <span class="token punctuation">(</span>uint32<span class="token operator">*</span><span class="token punctuation">)</span><span class="token number">0xF0001000</span><span class="token punctuation">;</span>
+<span class="token operator">*</span>TOM0_TGC0_GLB_CTRL <span class="token operator">|=</span> <span class="token punctuation">(</span><span class="token number">0x1</span> <span class="token operator">&lt;&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 使能通道1</span>
+</code></pre>
+<p>步骤3：映射到物理引脚<br/> 在微控制器的引脚复用配置中，将 TOM0_CH1_TOUT 映射到目标物理引脚（如P11.14）。</p>
+<hr/>
+<p><mark>回到主题 包看懂的^ , ^</mark><br/> 查看文档&lt;&lt;T********C37x_appx_um_v2.0.pdf &gt;&gt;找到GTM_TOUT126对应的TOM unit及channel number.<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/2d3d82b5b8ee4950b7dbaf4c37415e93.jpeg"/><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/0e475d6121b44dd18e0f9236629be41c.jpeg"/></p>
+<p>也就是我们需要配置TOM2_7映射关系.<br/> MCAL-&gt;MCU-&gt;GtmGlobalConfiguration-&gt;GtmTomGlobalConf-&gt; GtmTomGlobalConf_2-&gt;GtmTomChannelConf下配置TOM Channel和Port pin的<strong>映射关系</strong>，TOM2_7为PORT11_PIN14. <br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a23d4c29e3f245f5827828d106c1864c.jpeg"/></p>
+<p>MCAL-&gt;MCU-&gt; McuHardwareResourceAllocationConf-&gt; McuGtmAllocationConf-&gt; McuGtmTomAllocationConf-&gt; McuGtmTomAllocationConf_2-&gt;McuGtmTomChannelAllocationConf配置<strong>Channel功能</strong>.<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/d85b42a2fda84df286cf701476486c2b.jpeg"/></p>
+<h5><a id="33_PWM_292"></a>3.3 配置PWM模块</h5>
+<h6><a id="331PWMGTM_293"></a>3.3.1PWM引用GTM通道配置</h6>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/e1514432bd564723ad11313805fa8fa1.jpeg"/></p>
+<p>通过上文知道，该PWM Channel引用GTM TOM2_7，使用Fixed Clock 0，也就是200MHz.</p>
+<h6><a id="332PwmNotification_297"></a>3.3.2PwmNotification</h6>
+<p>PWM一般不用配置PwmNotification.</p>
+<h6><a id="333PwmChannelClass_299"></a>3.3.3PwmChannelClass</h6>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/64746e0152d54aa79e9eadf48efb0f12.jpeg"/></p>
+<p>既想改变周期，又想改占空比，就配置为PWM_VARIABLE_PERIOD.<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/8de70347570248b7a529d305607b058a.jpeg"/></p>
+<h6><a id="334_General_305"></a>3.3.4 General</h6>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/dd7e7e2d9c694996be9b089a3dbdca43.jpeg"/></p>
+<p><strong>PwmChannelID</strong> : 自动分配，标识当前Pwm Channel.<br/> <strong>PwmAssignedHwUnit</strong> : PWM Channel使用的硬件模块，可以选GTM和CCU6，我们配置使用GTM.<br/> <strong>PwmIdleState</strong> : 空闲电平。<br/> <strong>PwmPolarity</strong> : 极性，可Idle电平相反，也就是计算占空比的电平状态。<br/> Note: 占空比Dutycycle和周期Period都是以ticks数来配置的，比如我们使用200MHz的时钟，则一个tick的时间=1/(200 * 10^6)秒，如果我们需要配置20KHz的PWM输出频率，50%的占空比，则：<br/> 1）20KHz的PWM的周期为：1/(20*10^3)s<br/> 2）20KHz的PWM周期需要的ticks数为：(1/(20 * 10^3) )/( 1/(200 * 10^6)) = 10000<br/> 3）50%的PWM的占空比需要的ticks数为：10000/2 = 5000.<br/> <strong>PwmDutycycleDefault</strong> : 5000<br/> <strong>PwmPeriodDefault</strong> : 10000</p>
+<h6><a id="34ResourceM_318"></a>3.4配置ResourceM</h6>
+<p>使用EB工具，多核芯片需要配置硬件资源归属于哪一个Core.<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/02facd97f4064588bb5986dbb29c4074.jpeg"/><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/079d6a6d848347cc920ceb3b252bf5ba.jpeg"/></p>
+<h4><a id="4_RH850U2APWM_323"></a>4. 基于RH850U2A芯片的PWM配置实践</h4>
+<p><strong>需求：</strong> 需要配置基于RH850-U2A芯片的ECU的M_PO_PwmTest脚位PWM输出口，且频率和占空比可调，频率输出大概为1000Hz。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/7a2d71323cbe4466bd3dcaa570d5ec98.jpeg"/></p>
+<h5><a id="41_Port_328"></a>4.1 配置Port口</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/e6b8eb38d11d4b2497d3c779b992dc1e.jpeg"/></p>
+<p>芯片的Port口一般是复用口，需要配置Port口的工具为PWM输出脚。</p>
+<h5><a id="42_PWM_332"></a>4.2 PWM通用项配置</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/d7b291d93c754690a9d9e42185e6c752.jpeg"/></p>
+<p>配置PWM模块的通用（General）项，包括芯片类型，使用二类中断等。</p>
+<h5><a id="43__336"></a>4.3 配置可用服务</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/454b8c564b134749afaa63ad3dd1759b.jpeg"/></p>
+<p>配置PWM模块需要使用的那些API服务，我们主要使用PWM的Set Period and Duty的功能。</p>
+<h5><a id="44_PWM_340"></a>4.4 配置PWM输出需要的时钟</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/170e0854ece84a768efb6ae2bd7b1649.jpeg"/></p>
+<p>PWM模块使用的时钟源是80MHz，我们想得到1us的Tick基准，使用PCLK分频后的Ck3作为PWM通道的时钟。</p>
+<h5><a id="45_PWM_344"></a>4.5 配置PWM通道</h5>
+<h4><a id="5__345"></a>5. 总结</h4>
+<p>配置好PWM模块后，PWM功能的使用模块就可以分装PWM提供的标准接口来实现特定的需求。一般我们会在IoHwAb模块分装PWM模块的使用细节，让ASW直接使用IoHwAb模块分装后的接口。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/36d633f4041148de882ee6c263fc9c70.jpeg"/></p>
+<h3><a id="ECUHVIL_353"></a>ECU抽象层HVIL软件实现：</h3>
+<p>在ECU抽象层实现HVIL信号处理模块。该组件实现互锁信号的输出控制，检测输出互锁信号和输入信号。</p>
+<h4><a id="1_355"></a>1.明确软件需求</h4>
+<p><strong>HVIL输出：</strong><br/> 每xx ms接收ASW HVIL控制信号，当收到ASW请求为1时，输出xx %占空比以及xx hz频率的PWM并将占空比以及频率上传至RTE。<br/> <strong>HVIL输入回检：</strong><br/> 每xx ms回检输入的PWM信号，并将检测到的占空比以及频率上传至RTE。<br/> <strong>HVIL输入输出电平检测</strong><br/> 每xx ms对输出与输入的PWM进行电平检测，并对其进行诊断，上传相应的电平值至RTE。<br/> <strong>HVIL故障诊断</strong><br/> 当HVIL故障诊断使能的时候，xx ms检测HVIL回路是否存在对地短路/对电源短路或者开路故障。</p>
+<h4><a id="2_365"></a>2.软件设计</h4>
+<p>HVIL模块主要包含了以下几个功能：<br/> 1.HVIL初始化，初始化并配置所有ICU通道和ICU的参数。<br/> 2.当BSW收到ASW或UDS请求除输出PWM时，BSW应输出xx%占空比以及xxhz频率的PWM以及对输出的PWM进行回检，验证输出是否正确并且上传信号至RTE。<br/> 3.BSW应对输入的PWM进行回检，并计算出对应的占空比以及频率提供给RTE。<br/> 4.当HVIL诊断使能条件满足时，BSW应对HVIL回路进行故障诊断。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/47f863d8d08349919658dc71a88422f2.jpeg"/></p>
+<h2><a id="_375"></a>高压互锁故障</h2>
+<h3><a id="_376"></a>开路故障</h3>
+<p>开路前： R1 R2 和 R3 R4 并联<br/> 开路后：恒流源只通过 R1 R2，<br/> 电流是恒定的， HVIL_OUT_AD采集的电压要比正常连通时要高<br/> HVIL_IN_AD采集电压接近 0<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/7cbe391dff4c41a6ab52f29713a39ec7.png"/></p>
+<h3><a id="_384"></a>短电源故障</h3>
+<p>前提条件：Power 大于或等于 VIN-C1<br/> 由于前提条件可得，二极管无法导通，所以对于HVIL_OUT_AD采集的电压和开路时相同<br/> 而HVIL_IN_AD采集电压根据 Power 计算分担电压<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ffd70d2e0ab94422a3b01e1ae2099960.png"/></p>
+<h3><a id="_391"></a>短地故障</h3>
+<p>短地导致R1 R2基本没有电流经过，，所以对于HVIL_OUT_AD采集的电压较低或接近 0<br/> 而HVIL_IN_AD采集电压 接近 0<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ab6e17cb261a40fbb4e0cc3b9422e1b6.png"/></p>
+<h3><a id="_395"></a>其他常见故障：</h3>
+<p>线束错误导致开路<br/> 互锁开关失效导致开路<br/> 端子退针导致开路<br/> 对地 / 电源短路<br/> 动力电池内部故障<br/> MSD<br/> MSD被称为手动维修保护开关，其内置高压保险丝，具有高压互锁功能，一般安装在主正回路上；MSD的主要功能是为了保护在高压环境下从事电动汽车维修人员的安全。</p>
+<p>例如车辆外部高压线路出现短路情况时，MSD会立即断开内部保险丝，快速分离高压电路的连接。手动断开高压时，MSD高压互锁先断开，然后再断开高压回路，保证维修工作及人员出于一种较为安全的状态。</p>
+</div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-e1cc28b339.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-d1e89cace4.css" rel="stylesheet"/>
+</div></body></html>

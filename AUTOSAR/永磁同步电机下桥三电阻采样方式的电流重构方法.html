@@ -1,0 +1,209 @@
+<html><head><meta charset='utf-8'></head><body><div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-a50b13a894.css" rel="stylesheet"/>
+<div class="htmledit_views atom-one-dark" id="content_views">
+<h2 style="background-color:transparent">一、问题现象描述</h2>
+<h3>1.1 问题简述</h3>
+<p>在某些应用场景如空调，电动自行车，水泵等，因为成本的关系，通常使用基于下桥的三相电阻采样方案。</p>
+<p><strong>此时只有下桥开通时才有电流流过检流电阻，因此只有在下桥开通时才能采样到有效电流。</strong></p>
+<p><img alt="" height="294" src="https://i-blog.csdnimg.cn/direct/58ed837353be45d5a773caf00bcbb39a.png" width="400"/></p>
+<p> 
+</p><p>使用传统的三相电流重构算法，在高调制率 (大约大于 80%) 时因下桥开通时间太短，所以无法采到有效三相电流，从而导致电机无法正常运行。</p>
+<figure class="image"><img alt="" height="221" src="https://i-blog.csdnimg.cn/direct/7012283e36974b26b25bbf1aa13fd2df.png" width="696"/>
+<figcaption>母线为 5A 电流的采样波形</figcaption>
+</figure>
+<p>此时通常通过限制调制率 (也就是将三项的 PWM 峰值控制在一定范围内) 的方法来保证电机可靠运行，但这样会限制母线电压利用率，从而影响电机运行效率。</p>
+<h3>1.2 为什么下管开管的时候不能采样</h3>
+<h4>1.2.1 下管采样失效</h4>
+<p>下管关断后，电机相电流不会凭空消失。它会通过其他路径续流，比如：</p>
+<ul><li>上管 MOS / 体二极管 / 其他相桥臂</li></ul>
+<p>此时电流可能绕开当前相的低边采样电阻，但是我们实际采样的却是运放一段浮空的电压。</p>
+<h4>1.2.2 下管采样的振铃</h4>
+<p>刚关管瞬间有大量开关噪声，下管从导通变成关断时，会有：</p>
+<table><thead><tr><th>干扰</th><th>来源</th></tr></thead><tbody><tr><td>开关尖峰</td><td>MOSFET 电压/电流快速变化</td></tr><tr><td>振铃</td><td>寄生电感 + MOS 电容谐振</td></tr><tr><td>反向恢复</td><td>体二极管/续流二极管恢复</td></tr><tr><td>地弹</td><td>大 di/dt 经过功率地</td></tr><tr><td>运放过冲</td><td>采样放大器输入共模突变</td></tr></tbody></table>
+<p>下图是电流波形和 PWM 调制的波形，可见电流的低谷和峰值区域，PWM 占空比最大或最小：</p>
+<p><img alt="" height="590" src="https://i-blog.csdnimg.cn/direct/7080306e77894f6c8d1ab168ffba1f98.png" width="1621"/></p>
+<p>下图为下管采样运放输出的实际测量波形，可见运放确实采集到的正弦波电流。</p>
+<p>可是伴随着电机换相，其相电流包括了大量的振铃，并且电流毛刺顶峰在 PWM 占空比最高的最低的地方居多，也就是电流的峰值和低谷区域。</p>
+<figure class="image"><img alt="" height="669" src="https://i-blog.csdnimg.cn/direct/de1e6570dc704ed8bc89c93e8c41b36b.jpeg" width="376"/>
+<figcaption>运放输出的波形</figcaption>
+</figure>
+<h3>1.3 最简单粗暴的解决办法</h3>
+<p>调制比和 PWM 占空比范围如下：</p>
+<p><img alt="" height="336" src="https://i-blog.csdnimg.cn/direct/d8d909afc1ea478a97a1db88d53b503b.png" width="598"/></p>
+<p>我们可以直接让调制比 M 限定在一定范围，这样就限制了下管的最大和最小占空比，如果不存在完全关管的情况，下管近似于始终有电流流过，自然就没有下管的振铃了。</p>
+<p>当然，这只是最简单的方式，这是以限制硬件极限为代价达成的。</p>
+<p>我们下面讨论不限制调制比的下管采样算法。</p>
+<h2 style="background-color:transparent">二、相位选择处理</h2>
+<h3>2.1 原理概述</h3>
+<p>简单来说就是采用的时候，丢弃掉下管开管最短的一相，改用其他两相补一下。</p>
+<h3 style="background-color:transparent">2.2 原理解析</h3>
+<p>下图为下桥三相 PWM 控制输出波形：</p>
+<p><img alt="" height="295" src="https://i-blog.csdnimg.cn/direct/38fbf54ddc914419bdf4b45c650f5d02.png" width="329"/></p>
+<p>较为简单常用的办法是：</p>
+<p>当 T1 &lt;= T2 和 T3 时，只采样 U 相和 V 相电流，那么 W 相电流也就等于：</p>
+<p><img alt="I_W=-(I_U+I_V)" class="mathcode" src="https://latex.csdn.net/eq?I_W%3D-%28I_U&amp;plus;I_V%29"/></p>
+<ul><li><img alt="I_W" class="mathcode" src="https://latex.csdn.net/eq?I_W"/> = W 相电流</li><li><img alt="I_U" class="mathcode" src="https://latex.csdn.net/eq?I_U"/> = U 相电流</li><li><img alt="I_V" class="mathcode" src="https://latex.csdn.net/eq?I_V"/> = V 相电流</li></ul>
+<p>当 T2 &lt;= T1 和 T3 时，只采样 U 相和 W 相电流，那么 V 相电流也就等于：</p>
+<p><img alt="I_V=-(I_U+I_W)" class="mathcode" src="https://latex.csdn.net/eq?I_V%3D-%28I_U&amp;plus;I_W%29"/></p>
+<p>当 T3 &lt;= T1 和 T2 时，只采样 V 相和 W 相电流，那么 U 相电流也就等于：</p>
+<p><img alt="I_W=-(I_U+I_V)" class="mathcode" src="https://latex.csdn.net/eq?I_W%3D-%28I_U&amp;plus;I_V%29"/></p>
+<h3><strong>2.3 代码演示</strong></h3>
+<p>t_SVPWM_GenRegS.s32_DutyA 是 A 相上管的开管时间。</p>
+<p>上管开管时间越长，下管开管时间越短，所以我们取上管开管最长的相不采集，使用互补计算，全部代码如下：</p>
+<pre>
+<code class="language-cpp">f_MC_ADC_Channel_Change()
+{
+    uint8_t adc_sample = 0;
+
+    if ((t_SVPWM_GenRegS.s32_DutyA &lt;= t_SVPWM_GenRegS.s32_DutyC) &amp;&amp; (t_SVPWM_GenRegS.s32_DutyA &gt;= t_SVPWM_GenRegS.s32_DutyB))
+    {
+        adc_sample = 2;
+    }
+    else if ((t_SVPWM_GenRegS.s32_DutyB &lt;= t_SVPWM_GenRegS.s32_DutyA) &amp;&amp; (t_SVPWM_GenRegS.s32_DutyB &gt;= t_SVPWM_GenRegS.s32_DutyC))
+    {
+        adc_sample = 3;
+    }
+    else if ((t_SVPWM_GenRegS.s32_DutyC &lt;= t_SVPWM_GenRegS.s32_DutyA) &amp;&amp; (t_SVPWM_GenRegS.s32_DutyC &gt;= t_SVPWM_GenRegS.s32_DutyB))
+    {
+        adc_sample = 1;
+    }
+
+    if (adc_sample &lt; 10)
+    {
+        switch (adc_sample)
+        {
+        case 1:
+            s32_Temp_Phae_Cur_C = 0 - s32_Temp_Phae_Cur_A - s32_Temp_Phae_Cur_B;
+            break;
+        case 2:
+            s32_Temp_Phae_Cur_A = 0 - s32_Temp_Phae_Cur_C - s32_Temp_Phae_Cur_B;
+            break;
+        case 3:
+            s32_Temp_Phae_Cur_B = 0 - s32_Temp_Phae_Cur_A - s32_Temp_Phae_Cur_C;
+            break;
+        }
+    }
+}</code></pre>
+<h3>2.4 效果演示</h3>
+<p>在使用相位选择的逻辑后，我们的采样波形略好一点，但仍然不是正弦波。</p>
+<figure class="image"><img alt="" height="279" src="https://i-blog.csdnimg.cn/direct/11b81dcebb1a4fa397fddff510099f28.png" width="934"/>
+<figcaption>母线为 5A 电流的采样波形</figcaption>
+</figure>
+<h2>三、采样窗口时间选择</h2>
+<h3>3.1 中心对齐模式</h3>
+<p>我们使用中心对齐模式进行 PWM 波形的输出。</p>
+<p>在凌欧的芯片中，PWM 中心对齐模式是从负数开始计数的。</p>
+<p><img alt="" height="274" src="https://i-blog.csdnimg.cn/direct/1c440d2d421a413892c1b504043df831.png" width="255"/></p>
+<p>假设 m_EPWM_PERIOD 是PWM 定时器在中心对齐模式下的半周期计数值，那么我们整个就是就是这样的规律：</p>
+<ul><li>- EPWM_PERIOD (起始点) → 0 (中心点) → + EPWM_PERIOD (结束点)</li></ul>
+<h3>3.2 采样窗口选择</h3>
+<ul></ul>
+<p> 在选择每个PWM 周期的采样窗口 (采样时刻) 时，并不是下管打开的时候就是最佳的采样时刻。</p>
+<p>而是应该避开：</p>
+<ul><li>刚发生 PWM 翻转 (dv/dt、di/dt)</li><li>死区刚结束 / 管子刚导通</li><li>电流振铃还没消</li></ul>
+<p><strong>一个采样窗口是</strong>某一相导通且电流稳定的<strong>最小连续时间。</strong></p>
+<p>这个时间至少要包含，振铃时间、死区/开管时间、ADC采样保持时间。当我们</p>
+<h3>3.1 三项完整窗口采样</h3>
+<p>如果我们有一个完整的采样窗口，也就是：</p>
+<p><img alt="EPWM_{PERIOD}-T_{max}&gt;T_{window}" class="mathcode" src="https://latex.csdn.net/eq?EPWM_%7BPERIOD%7D-T_%7Bmax%7D%3ET_%7Bwindow%7D"/></p>
+<ul><li><img alt="EPWM_{PERIOD}" class="mathcode" src="https://latex.csdn.net/eq?EPWM_%7BPERIOD%7D"/> = PWM 周期计数</li><li><img alt="T_{max}" class="mathcode" src="https://latex.csdn.net/eq?T_%7Bmax%7D"/> = 三项中最大的计数</li><li><img alt="T_{window}" class="mathcode" src="https://latex.csdn.net/eq?T_%7Bwindow%7D"/> = 窗口时间 (振铃、死区和开关管时间)</li></ul>
+<p>很显然，我们最佳的采样的时间是 PWM 周期中的起始点，这里举例开关管的振铃最小，因为我们是中心对齐模式，所以在公式上，我们采样窗口就是：</p>
+<p><img alt="Temp=1-EPWM_{PERIOD}" class="mathcode" src="https://latex.csdn.net/eq?Temp%3D1-EPWM_%7BPERIOD%7D"/></p>
+<p>也就是每个 PWM 周期的起点采样，采样时刻如下图所示：</p>
+<p><img alt="" height="294" src="https://i-blog.csdnimg.cn/direct/4d991886b6414976b2f917c946a9c0f6.jpeg" width="626"/></p>
+<p></p>
+<h3>3.2 三项半个窗口采样</h3>
+<p>如果我们 PWM 在开始不足一个采样窗口，但是大于半个窗口：</p>
+<p><img alt="EPWM_{PERIOD}-T_{max}&gt;\frac{T_{window}}{2}" class="mathcode" src="https://latex.csdn.net/eq?EPWM_%7BPERIOD%7D-T_%7Bmax%7D%3E%5Cfrac%7BT_%7Bwindow%7D%7D%7B2%7D"/></p>
+<ul><li><img alt="EPWM_{PERIOD}" class="mathcode" src="https://latex.csdn.net/eq?EPWM_%7BPERIOD%7D"/> = PWM 周期计数</li><li><img alt="T_{max}" class="mathcode" src="https://latex.csdn.net/eq?T_%7Bmax%7D"/> = 三项中最大的计数</li><li><img alt="T_{window}" class="mathcode" src="https://latex.csdn.net/eq?T_%7Bwindow%7D"/> = 窗口时间 (振铃、死区和开关管时间)</li></ul>
+<p>此时我们的采样方式计算为：</p>
+<p><img alt="Temp=t_{max}+T_{window}-2\cdot EPWM_PREIOD+1" class="mathcode" src="https://latex.csdn.net/eq?Temp%3Dt_%7Bmax%7D&amp;plus;T_%7Bwindow%7D-2%5Ccdot%20EPWM_PREIOD&amp;plus;1"/></p>
+<p>其目的是躲避之前开管的振铃，他比三项完整窗口采样要向后一点。</p>
+<p>也就是下图这个区域：</p>
+<p><img alt="" height="295" src="https://i-blog.csdnimg.cn/direct/830d0cef9cec47c5b7e6bce7b01b36df.jpeg" width="628"/></p>
+<p></p>
+<h3>3.3 两项完整窗口采样</h3>
+<p>如果三项半个窗口都不满足，我们只能在两项窗口区采集。</p>
+<p><img alt="" height="302" src="https://i-blog.csdnimg.cn/direct/4f28794fc56840449f9d463497169588.jpeg" width="643"/></p>
+<h3>3.4 全部代码</h3>
+<p>我们把两种采样方式融合到一个函数中：</p>
+<pre>
+<code class="language-cpp">f_MC_ADC_Channel_Change()
+{
+    uint8_t adc_sample = 0;
+
+    if ((t_SVPWM_GenRegS.s32_DutyA &lt;= t_SVPWM_GenRegS.s32_DutyC) &amp;&amp; (t_SVPWM_GenRegS.s32_DutyA &gt;= t_SVPWM_GenRegS.s32_DutyB))
+    {
+        adc_sample = 2;
+    }
+    else if ((t_SVPWM_GenRegS.s32_DutyB &lt;= t_SVPWM_GenRegS.s32_DutyA) &amp;&amp; (t_SVPWM_GenRegS.s32_DutyB &gt;= t_SVPWM_GenRegS.s32_DutyC))
+    {
+        adc_sample = 3;
+    }
+    else if ((t_SVPWM_GenRegS.s32_DutyC &lt;= t_SVPWM_GenRegS.s32_DutyA) &amp;&amp; (t_SVPWM_GenRegS.s32_DutyC &gt;= t_SVPWM_GenRegS.s32_DutyB))
+    {
+        adc_sample = 1;
+    }
+
+    if (adc_sample &lt; 10)
+    {
+        switch (adc_sample)
+        {
+        case 1:
+            s32_Temp_Phae_Cur_C = 0 - s32_Temp_Phae_Cur_A - s32_Temp_Phae_Cur_B;
+            break;
+        case 2:
+            s32_Temp_Phae_Cur_A = 0 - s32_Temp_Phae_Cur_C - s32_Temp_Phae_Cur_B;
+            break;
+        case 3:
+            s32_Temp_Phae_Cur_B = 0 - s32_Temp_Phae_Cur_A - s32_Temp_Phae_Cur_C;
+            break;
+        }
+    }
+
+#define RINGING_TIME 2 // 振铃
+#define TON_TIME 2     // 死区加开管时间
+#define SAMPLE_TIME 1  // 采样+关管时间
+
+    if ((m_EPWM_PERIOD - tmax) &gt; ((RINGING_TIME + TON_TIME) * PWM_1US)) 
+    {
+        temp = 1 - m_EPWM_PERIOD;
+        MCPWM_TMR0 = (u16)(temp);
+    }
+    else if ((m_EPWM_PERIOD - tmax) &gt; (((RINGING_TIME + TON_TIME) + SAMPLE_TIME) / 2 * PWM_1US))
+    {
+        temp = ((RINGING_TIME + TON_TIME) * PWM_1US + tmax - m_EPWM_PERIOD * 2 + 1);
+        if (temp &lt; 1 - m_EPWM_PERIOD)
+            temp = 1 - m_EPWM_PERIOD;
+    }
+    else
+    {
+        if ((tmax - tmin) &gt; (((RINGING_TIME + TON_TIME) + SAMPLE_TIME) * PWM_1US /* - 30*/)) 
+        {
+            temp = ((-tmax) + ((RINGING_TIME + TON_TIME) * PWM_1US));
+            t1 = temp;
+            if (temp &lt; 1 - m_EPWM_PERIOD)
+                temp = 1 - m_EPWM_PERIOD;
+            MCPWM_TMR0 = (uint16_t)temp;
+        }
+        else // 无法采样
+        {
+            temp = 1 - m_EPWM_PERIOD;
+            MCPWM_TMR0 = (u16)(temp);
+            adc_sample += 0x10;
+        }
+    }
+}</code></pre>
+<h3>3.5 效果演示</h3>
+<p>可见，较为完整的还原出了正弦波：</p>
+<figure class="image"><img alt="" height="400" src="https://i-blog.csdnimg.cn/direct/3a0b469a393c493d85b73af6d1c4df60.png" width="934"/>
+<figcaption>母线为 5A 电流的采样波形</figcaption>
+</figure>
+<h3>3.6 加深理解</h3>
+<p>注意，我们切换采样的所要达成的目的也是为了躲避开关管的振铃。</p>
+<p>下图1.00us单位每格的波形，第一个尖峰是刚刚开管的波形，可见前面振铃明显，我们要做的就是后移每个周期的采样时间，跳过这个尖峰。</p>
+<p><img alt="" height="822" src="https://i-blog.csdnimg.cn/direct/f662580340fe499094f9bbacbb05e132.jpeg" width="462"/></p>
+<p></p>
+</div>
+</div></body></html>

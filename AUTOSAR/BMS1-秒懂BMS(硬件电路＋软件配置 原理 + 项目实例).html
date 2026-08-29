@@ -1,0 +1,106 @@
+<html><head><meta charset='utf-8'></head><body><div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-a50b13a894.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-dark" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p><a href="https://blog.csdn.net/weixin_45479529/article/details/145633837?sharetype=blogdetail&amp;sharerId=145633837&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">BMS1–BMS基础(硬件电路＋软件配置 原理 + 项目实例)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145689852?spm=1001.2014.3001.5501">BMS2–BMS底软HVIL (硬件电路＋软件配置 原理 + 项目实例)[万字图解 含ADC PWM Port配置及原理详解]</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/148279081?spm=1011.2124.3001.6209">BMS3–BMS充电管理</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145686720?sharetype=blogdetail&amp;sharerId=145686720&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar1–先导篇 AutoSar 模块及分层开发活动详解</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156234198?sharetype=blogdetail&amp;sharerId=156234198&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar2–BMS编译调试工具介绍</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158701950?spm=1011.2124.3001.6209">AutoSar3–Polyspace 代码常犯错误汇总</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156363653?sharetype=blogdetail&amp;sharerId=156363653&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar4–AUTOSAR平台OS模块配置</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158845555?sharetype=blogdetail&amp;sharerId=158845555&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar5–CAN通信栈(Can通讯原理+配置+实战项目需求)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158930522?sharetype=blogdetail&amp;sharerId=158930522&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">动力总成1 OBC DCDC(万字原理+BMS VCU交互+国标详解)</a></p>
+<p></p>
+<div class="toc">
+<h4>BMS基础知识</h4>
+<ul><li><a href="#BMS_12">BMS基础知识</a></li><li><ul><li><a href="#BMS_15">一、BMS概述</a></li><li><ul><li><a href="#_18">电池发展状况</a></li><li><a href="#_20">锂电池的安全需求</a></li><li><a href="#_22">锂电池的功能需求</a></li><li><a href="#BMS_27">（BMS）主要有三个功能：</a></li></ul>
+</li><li><a href="#BMS_32">二、BMS架构</a></li><li><a href="#_44">三、功能描述</a></li><li><ul><li><a href="#_45">单体电池电压采集</a></li><li><a href="#_48">单体电池温度采集</a></li><li><a href="#_52">电流测量</a></li><li><a href="#_55">总压采集</a></li><li><a href="#IO_59">IO信号测量</a></li><li><a href="#SOC_65">SOC广义描述</a></li><li><a href="#SOC_68">SOC表示方法</a></li><li><a href="#SOC_74">SOC估算</a></li><li><a href="#SOC_77">SOC估算技术难点</a></li><li><a href="#SOH_87">SOH估算</a></li><li><a href="#SOP_94">SOP估算</a></li><li><a href="#_103">均衡控制</a></li><li><a href="#_105">电池不一致性</a></li><li><ul><li><a href="#_118">能量耗散型均衡</a></li><li><a href="#_120">能量非耗散型均衡</a></li></ul>
+</li><li><a href="#_122">均衡方法</a></li><li><ul><li><a href="#_124">旁路电阻均衡</a></li><li><a href="#_126">投切电容</a></li><li><a href="#_128">开关电容</a></li><li><a href="#_131">同轴多副变压器均衡</a></li></ul>
+</li><li><a href="#_133">热管理</a></li><li><ul><li><a href="#_136">热管理系统要求</a></li></ul>
+</li><li><a href="#_141">绝缘检测</a></li><li><a href="#_145">故障诊断</a></li><li><ul><li><a href="#_149">故障诊断分类</a></li></ul>
+</li><li><a href="#_151">充放电管理</a></li><li><a href="#_156">上位机</a></li></ul>
+</li><li><a href="#_159">补充核心三大功能部件</a></li><li><ul><li><a href="#VCUVehicle_Control_Unit_160">VCU（Vehicle Control Unit）整车控制器</a></li><li><a href="#MCUMoter_Control_Unit_163">MCU（Moter Control Unit）电机控制器</a></li><li><a href="#BMSBattery_Management_System_165">BMS（Battery Management System）电池管理系统</a></li></ul>
+</li></ul>
+</li></ul>
+</div>
+<p></p>
+<h2><a id="BMS_12"></a>BMS基础知识</h2>
+<p><strong>以柳汽项目为例，从软件、硬件、系统层面介绍BMS</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/e40e1365ab364306b8ebdbd232df6022.png"/></p>
+<h3><a id="BMS_15"></a>一、BMS概述</h3>
+<p>电动车上的三电技术：电池、电机、电控技术是电动车最核心的技术，因为这三项技术的应用，是每一辆电动车都需要并且直接影响车辆的续航里程、加速时间、行驶安全等参数。其中<strong>电控</strong>最核心的功能就是电池管理系统（Battery Management System）简称<strong>BMS</strong>。</p>
+<h4><a id="_18"></a>电池发展状况</h4>
+<p><img alt="电池比较" src="https://i-blog.csdnimg.cn/direct/4f283bfb589b45f0b2287a8f436a353f.png"/></p>
+<h4><a id="_20"></a>锂电池的安全需求</h4>
+<p>一次过放电就会造成电池的永久性损害，在极端环境下，锂电池过热或者过充电会导致热失控，电池破裂甚至爆炸。锂电池需要BMS来严格控制充放电过程，避免过充、过放、过热。</p>
+<h4><a id="_22"></a>锂电池的功能需求</h4>
+<p>锂电池在使用过程中需要知道电池的SOC参数，通过SOC预测电池的剩余电量。BMS必须能够实时测算锂电池的SOC。<br/> 大容量锂电池存在比较明显的不一致性，不一致性会影响电池的充放电能力及循环寿命。BMS必须能够通过均衡管理改善不一致性，提升锂电池整体性能。<br/> 电池在不同的温度下会有不同的工作性能，锂电池的最佳工作温度为25~40℃。温度的变化会使电池的SOC、内阻和可用电量发生变化，甚至会影响到电池的使用寿命。BMS必须能够控制/协助整车控制电池工作的环境温度，使电池发挥较高的性能。</p>
+<h4><a id="BMS_27"></a>（BMS）主要有三个功能：</h4>
+<p>实时<strong>监控电池状态</strong>。通过检测电池的外特性参数（电压、温度、电流等），采用适当的算法，实现电池内部状态（容量、SOC等）的估算和监控。<br/> 建立<strong>通信总线</strong>，与整车控制器和充电机等实现数据交换。<br/> 在正确获取电池的状态后进行<strong>热管理</strong>、电池<strong>均衡管理</strong>、<strong>充放电管理</strong>、<strong>故障</strong>报警等；确保电池安全使用，提高电池利用率，延长电池使用寿命。从而进一步保障电动汽车安全、可靠、高效的运行。</p>
+<h3><a id="BMS_32"></a>二、BMS架构</h3>
+<p>以柳汽S50EVB为例<br/> <img alt="以柳汽S50EVB为例" src="https://i-blog.csdnimg.cn/direct/c53944bcaa9b44f68b80567e1cc5e643.png"/><br/> BMS系统网络拓扑图<br/> <img alt="BMS系统网络拓扑图" src="https://i-blog.csdnimg.cn/direct/d3d0e1bd887e4174b3778cfdd7ff565a.png"/><br/> <img alt="BMS系统网络拓扑图" src="https://i-blog.csdnimg.cn/direct/091f82844884454b8edadee887605809.png"/><br/> 以软件功能划分<img alt="以功能划分" src="https://i-blog.csdnimg.cn/direct/d81b184f5fa2402c9081037882bdfcaf.png"/><br/> 电池管理系统软件架构应用层软件是BMS的控制核心，包括电池保护、电气伤害保护、故障诊断<br/> 管理、热管理、接触器控制、从板控制、均衡控制、SOC估计和通讯管理<br/> 等模块。<img alt="软件架构" src="https://i-blog.csdnimg.cn/direct/071748c784984c76a346444064671778.png"/><br/> 电池管理系统硬件架构<img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/3a04825ccfcd46578e1a46a3738017a0.png"/></p>
+<h3><a id="_44"></a>三、功能描述</h3>
+<h4><a id="_45"></a>单体电池电压采集</h4>
+<p><strong>单体电池电压</strong>采集必须具备，因为BMS需要根据采集到的每个单体的电压判断充电终止和放电终止条件，防止过充和过放，保证电池使用安全。<br/> AFE芯片型号: LTC6811、LTC6812、MC33771</p>
+<h4><a id="_48"></a>单体电池温度采集</h4>
+<p>当前市场上BMS多数不具备检测所有单体电池电芯温度的功能，但是从技术角度考虑，采集每个电池的电芯温度非常重要。电池链接松动、使用不当、内部出现故障等情况下，很重要的表现就是温度上升，通过检测每个电池的电芯温度可以实时了解电池运行状况，提供异常报警，避免发生事故。<br/> 温度传感器一般采用NTC(软件通过查NTC表对应的模拟温度)</p>
+<h4><a id="_52"></a>电流测量</h4>
+<p>电流测量功能，一方面可以准确的控制充电过程中充电机的输出电流，实现既定充电策略；另一方面控制负载放电电流，保护电池放电过程中的安全。BMS对电流测量的精度要求很高，因为许多BMS的SOC基于电流计算，高精度的电流测量才能够保证高精度的SOC计算。<br/> BMS电流测量器件：分流器、霍尔元件（电气隔离）</p>
+<h4><a id="_55"></a>总压采集</h4>
+<p>电池总压测量功能，一方面可以与单体电压采样功能较验，另一方面是高压上电预充过程，继电器诊断必要输入信号。BMS应至少满足3路高压采样，B+B-、B+P-、P+P-。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/f19b01b4ec1f4a1298eccdcd89b8057f.png"/></p>
+<h4><a id="IO_59"></a>IO信号测量</h4>
+<p>BMS系统中通常包含的IO信号有电压信号、PWM信号、电平信号<br/> 电平信号检测：钥匙唤醒信号、DC_APS信号等<br/> PWM信号检测：慢充CP信号、风扇转速反馈信号、碰撞信号、高压互锁等<br/> 电压信号检测：供电电压、高边驱动电压、低边驱动电压、高压互锁、CC2电压、CC电压等</p>
+<h4><a id="SOC_65"></a>SOC广义描述</h4>
+<p>电池当前可用的剩余容量与电池实际可放出总容量的比值。（%）<br/> 通过SOC用户可以预估电池的剩余电量。单体电池的SOC估算也非常重要，因为最小单体的SOC决定了整个电池组的SOC。准确控制电池SOC范围，可避免电池过充过放。SOC不准确，电池性能不能充分发挥，整车性能降低。</p>
+<h4><a id="SOC_68"></a>SOC表示方法</h4>
+<p>化学法：通过测量电解液的比重或PH值来指示电池的SOC（没有密封的铅酸电池）<br/> 电压法：建立电池充放电过程中电压和SOC的对应关系，通过读取电压参数来反应SOC（受温度和电流影响）<br/> 电流积分：即所谓的安时积分法，将充放电电流与充放电时间进行积分，计算电量（需要校准），依赖于历史状态，有累积误差，有均衡的情况下SOC测算难度加大，但安时积分可以通过补偿，校准提高精度，目前应用最广泛<br/> 压力法：电池内部压力随着充电的持续而增加，根据测量到的压力判定SOC大小（适用于镍氢电池）</p>
+<h4><a id="SOC_74"></a>SOC估算</h4>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/5dd75fe99808490ea51f18e8f0f8b48b.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/9ac19783164d4825908a44913af0696c.png"/></p>
+<h4><a id="SOC_77"></a>SOC估算技术难点</h4>
+<p>电池内部电化学过程复杂<br/> 电池工作特性呈非线性，且受多种因素影响<br/> 建立准确的电池模型困难<br/> 单体间的不一致性处理较复杂<br/> 大电流可充放电容量低于额定容量，反之亦然<br/> 不同温度下电池组的容量存在一定的变化<br/> 电池的容量在循环过程中会逐渐减少<br/> ……</p>
+<h4><a id="SOH_87"></a>SOH估算</h4>
+<p>即电池的健康状态，是用来表征电池是否可以正常工作的一个指标，当SOH较差时电池可能已经处于失效状态。SOH主要表现在以下几方面：<br/> 容量衰减<br/> 内阻增大导致有源功耗<br/> 自放电率增大<br/> 初始放电电压下降<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/4895726289ec4a44bef087fd4f114d3a.png"/></p>
+<h4><a id="SOP_94"></a>SOP估算</h4>
+<p>即为电池包在将来一段时间内可用的最大放电、回馈及充电功率。整车通过当前SOP控制电池的实时功率输入及输出，需确保在满足整车动力性能条件下电池实时功率不超过电池的可用功率。SOP主要影响因素：<br/> SOC<br/> 温度<br/> 电池内阻<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/71aa6e4b0fe64f79be05013c417a4d76.png"/></p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ed119145323c46549e8861a9ad563775.png"/></p>
+<h4><a id="_103"></a>均衡控制</h4>
+<p>电池包中串联的单体，即使是新电池，其性能也存在差异，随充放电循环次数的增加，单体差异会越来越大，导致电池组容量利用率变低，最终发生“水桶效应”。</p>
+<h4><a id="_105"></a>电池不一致性</h4>
+<p>第一类：电池自身容量的差异导致的不一致性。由电池生产制造工艺不完善导致，同一批次电池容量有一定的离散型。<img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/3511e904e47841faa950132cb0aac854.png"/><br/> 第一类不一致性影响：充电时，#1电池先达到截止电压，充电终止；放电时三支电池几乎同时达到截止电压，放电终止，电池组的充放电能力受容量最小单体#1制约，实际只有95AH。</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/bc7c92e5c4114554a0b7a7755612cd6f.png"/><br/> 第二类：纯粹由各个单体电池初始电量差异导致的不一致性。电池组在实际应用过程中因为内阻差异、自放电率差异等原因，第二类不一致性会从无到有，从弱到强。</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/baf17802cbd44d7da4b01ef99503dcd6.png"/><br/> 第二类不一致性的影响：充电时#3电池先达到截止电压，充电终止。放电时#1先达到截止电压，放电终止；电池的实际容量是100AH，然而充放电能力实际只有90AH。</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/bc0fc5c1af774b2e9d82dd9668ff0eae.png"/><br/> BMS需要均衡功能，但是由于技术和成本等原因，并非所有BMS都具备均衡。选择均衡要看两个方面：均衡方式（被动均衡/耗散型、主动均衡/非耗散型）、均衡形式（充电均衡、放电均衡还是充放电均衡）和均衡能力（多大的均衡电流？）。</p>
+<h5><a id="_118"></a>能量耗散型均衡</h5>
+<p>主要通过将电池组中能量较高的电池利用其旁路电阻进行放电的方式损耗部分能量，以期达到电池组能量状态的一致。</p>
+<h5><a id="_120"></a>能量非耗散型均衡</h5>
+<p>利用储能原件和均衡旁路构建能量传递通道，将其从能量较高电池直接或间接转移至能量较低的电池</p>
+<h4><a id="_122"></a>均衡方法</h4>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/86aa92f66f964ca88e8dcb648945e406.png"/></p>
+<h5><a id="_124"></a>旁路电阻均衡</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/90db7989ac764f1d8df406a4b5c9242f.png"/></p>
+<h5><a id="_126"></a>投切电容</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/8edd61374aea47f896c3035748c655b9.png"/></p>
+<h5><a id="_128"></a>开关电容</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/bb3a6c2217b5425cabf7f3f335c4f151.png"/></p>
+<h5><a id="_131"></a>同轴多副变压器均衡</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a9f0910473ce4749bbad64157e71b408.png"/></p>
+<h4><a id="_133"></a>热管理</h4>
+<p>电动汽车自燃事件频出，究其原因主要与电池管理系统的热管理有关。由于过高或过低的温度都将直接影响动力电池的使用寿命和性能，并有可能导致电池系统的安全问题，并且电池箱内温度场的长久不均匀分布将造成个电池模块、单体间性能的不均衡，因此电池热管理系统对于电动车辆动力电池系统而言是必须的。可靠、高效的热管理系统对于电动车辆的可靠安全应用意义重大。</p>
+<h5><a id="_136"></a>热管理系统要求</h5>
+<p>电池温度的准确测量和监控<br/> 电池组温度过高时的有效散热和通风（风冷、液冷）<br/> 低温条件下的快速加热（加热器控制）<br/> 电池组内温度场的均匀分布</p>
+<h4><a id="_141"></a>绝缘检测</h4>
+<p>电动车辆动力电池系统电压已经大大超过了人体可以承受的安全电压，电动汽车动力电池系统电器绝缘性能是电安全管理的重要内容，绝缘性能的好坏不仅关系到电器设备和系统能否正常工作，更重要的是还关系到人的生命财产安全。<br/> 目前大多数采用<strong>不平衡电桥法</strong>进行绝缘电阻检测。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/467819aa6e554296bdec782b8ae66630.png"/></p>
+<h4><a id="_145"></a>故障诊断</h4>
+<p>故障诊断是指，对故障的检测、定位、上报等一系列动作以及完成整车控制器针对故障下达的指令，如切断主回路接触器或者降低功率运行等。<br/> 电池故障是指电池组、高压电回路、热管理等各个子系统的传感器故障、执行器故障（如接触器、风扇、加热器等），以及网络故障、各种控制器软硬件故障等。电池组本身故障是指过压（过充）、欠压（过放）、过电流、过温、内短路故障、接口松动、电解液漏液、绝缘故障等。</p>
+<h5><a id="_149"></a>故障诊断分类</h5>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/5fb846dc6ae04ed0b50d44fcd2255cbb.png"/></p>
+<h4><a id="_151"></a>充放电管理</h4>
+<p>充放电管理模块能够根据电池的特性、温度高低、故障等级以及充电机的功率等级等，实时监控及控制电池进行安全充放电。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/952fed4fb1ba43619e364f1c8eb0ed21.png"/></p>
+<h4><a id="_156"></a>上位机</h4>
+<p>不仅是开发过程的功能调试，还是生产下线的测试过程，都需要有上位机能够实时显示、检测、存储、标定电池组的参数，以及实现在线升级、故障查询等功能。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/c92fc3b0151f4950b51491a8b258525f.png"/></p>
+<h3><a id="_159"></a>补充核心三大功能部件</h3>
+<h4><a id="VCUVehicle_Control_Unit_160"></a>VCU（Vehicle Control Unit）整车控制器</h4>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/7b84c4d4945543a0a0650fd3b2c9e3dc.png"/></p>
+<h4><a id="MCUMoter_Control_Unit_163"></a>MCU（Moter Control Unit）电机控制器</h4>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/75f61d404bcd44d8ae269763fbd1033b.png"/></p>
+<h4><a id="BMSBattery_Management_System_165"></a>BMS（Battery Management System）电池管理系统</h4>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/f6f763339d554c11a76693243306f013.png"/></p>
+</div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-e1cc28b339.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-d1e89cace4.css" rel="stylesheet"/>
+</div></body></html>

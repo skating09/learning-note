@@ -685,3 +685,39 @@ WILLQos = 2, WILLRETAIN = 1:
 ### 1.4、回路细节（两个网络调试助手测试下Qos1, Qos2的应答测试下）
 
 一样的，没啥区别。
+
+## 二、STM32例子
+
+AT指令的结合模块连接到onenet, 注意的点是以json格式发送，然后做了个发送链表来作为数据发送设计挺好的。
+
+```c
+
+sendfun(){
+    if(timInfo.timer3Out - list_time >= 20)	
+    {
+        list_time = timInfo.timer3Out;
+
+        if(NET_DEVICE_CheckListHead())
+        {
+            NET_DEVICE_SendData(NET_DEVICE_GetListHeadBuf(),NET_DEVICE_GetListHeadLen());
+            NET_DEVICE_DeleteDataSendList();
+        }
+    }
+}
+void NET_DEVICE_SendData(unsigned char *data, unsigned short len)
+{
+
+    char cmdBuf[24];
+
+    DelayXms(50);						
+    sprintf(cmdBuf, "AT+CIPSEND=0,%d\r\n", len); 
+    if(!NET_DEVICE_SendCmd(cmdBuf, ">"))			
+    {
+        NET_IO_Send(data, len);  					
+    }
+
+    DelayXms(50);									
+}
+
+```
+

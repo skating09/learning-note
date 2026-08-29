@@ -1,0 +1,314 @@
+<html><head><meta charset='utf-8'></head><body><div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-a50b13a894.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-dark" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p><a href="https://blog.csdn.net/weixin_45479529/article/details/145633837?sharetype=blogdetail&amp;sharerId=145633837&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">BMS1–BMS基础(硬件电路＋软件配置 原理 + 项目实例)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145689852?spm=1001.2014.3001.5501">BMS2–BMS底软HVIL (硬件电路＋软件配置 原理 + 项目实例)[万字图解 含ADC PWM Port配置及原理详解]</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/148279081?spm=1011.2124.3001.6209">BMS3–BMS充电管理(国标+原理+项目)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145686720?sharetype=blogdetail&amp;sharerId=145686720&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar1–先导篇 AutoSar 模块及分层开发活动详解</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156234198?sharetype=blogdetail&amp;sharerId=156234198&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar2–BMS编译调试工具介绍</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158701950?spm=1011.2124.3001.6209">AutoSar3–Polyspace 代码常犯错误汇总</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156363653?sharetype=blogdetail&amp;sharerId=156363653&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar4–AUTOSAR平台OS模块配置</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158845555?sharetype=blogdetail&amp;sharerId=158845555&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar5–CAN通信栈(Can通讯原理+配置+实战项目需求)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158930522?sharetype=blogdetail&amp;sharerId=158930522&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">动力总成1 OBC DCDC(万字原理+BMS VCU交互+国标详解)</a></p>
+<p></p>
+<div class="toc">
+<h4>秒懂 CAN通信栈 Can通讯原理+配置</h4>
+<ul><li><a href="#BSWCAN_19">一、BSW的CAN功能详解</a></li><li><ul><li><a href="#1CAN_35">1.CAN分层活动</a></li><li><a href="#2_110">2.收发控制流(节点发送数据举例)</a></li><li><a href="#3_138">3.报文帧详解</a></li><li><a href="#4_141">4.报文发送方式</a></li><li><a href="#5_148">5.报文数据长度及填充</a></li><li><a href="#6_160">6.故障</a></li></ul>
+</li><li><a href="#CAN_176">二、CAN通讯栈配置(从底层往上)</a></li><li><ul><li><a href="#1CANCanConfigSet_179">1.CAN模块配置CanConfigSet</a></li><li><ul><li><a href="#CanControllers_185">CanControllers</a></li><li><ul><li><a href="#CanControllerBaudrateConfig_197">CanControllerBaudrateConfig</a></li><li><a href="#CanFilterMask_200">CanFilterMask</a></li></ul>
+</li><li><a href="#CanHardwareObjects_202">CanHardwareObjects</a></li><li><a href="#CanGeneral_217">CanGeneral</a></li><li><ul><li><a href="#CanMainfunctionRWPeriods_241">CanMainfunctionRWPeriods</a></li></ul>
+</li><li><a href="#_244">总结</a></li></ul>
+</li></ul>
+</li><li><a href="#CANC_248">三、项目实战CAN收发链路C代码实现</a></li><li><ul><li><a href="#1_AUTOSAR__CAN__249">1 宏观视角AUTOSAR 的 CAN 通信分层</a></li><li><a href="#2__API__261">2 底层 API 调用级的完整流转路线图</a></li><li><ul><li><a href="#Tx_Flow_264">报文发送流程（Tx Flow：从应用层到物理总线）</a></li><li><a href="#Rx_Flow_302">报文接收流程（Rx Flow：从物理总线到应用层）</a></li></ul>
+</li><li><a href="#3_Rx_Flow_369">3 应用层完整详细接收流程（Rx Flow）</a></li><li><a href="#4_Tx_Flow_423">4 应用层完整详细发送流程（Tx Flow）</a></li></ul>
+</li></ul>
+</div>
+<p></p>
+<p>先回顾一下AUTOSATR结构细分<img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/450cb7809b194ee493f0445e504752d5.png"/><br/> CAN网络可以理解为多台CAN设备连接在同一条CAN总线上组合成的网络，其中的CAN设备我们称之为节点。CAN网络拓扑结构如下图：<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a324a7d43b8c43e68341e2525ee0fb29.png"/></p>
+<h2><a id="BSWCAN_19"></a>一、BSW的CAN功能详解</h2>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/33c156f8a3534973b5200fbc14a4914a.png"/></p>
+<p><strong>COM</strong>：从应用层传下来数据首先就进入这里，应用层无需关心收发的数据是通过什么总线传输的，应用只需要将它传输给COM即可。同样，COM上传的数据也是很单纯的数据里面没有这个数据是什么总线上传的这样无意义的信息，应用层关心的是这个数据的实际意义和数据大小。所以<strong>COM</strong>主要就起了一个<strong>信号接口和网关</strong>的作用。</p>
+<p><strong>PDU Router</strong>:PDU-Protocol Data Unit:协议数据单元。功能是将COM下发的信号<strong>数据分配</strong>到相应的<strong>协议总线</strong>上去；或者将不同的<strong>协议</strong>变成同一信号<strong>上传</strong>给COM；</p>
+<p><strong>IPDU Mux</strong>:用于解析一些<strong>特殊的协议</strong>，比如CAN FD或者用户自定义的一些协议，作用是统一CAN ID，不同信号Layout</p>
+<p><strong>CAN Tp</strong>:分包数据传输与错误检测，一般来说只有在<strong>诊断</strong>的时候才会使用。</p>
+<p><strong>CAN If(CAN Interface)</strong>：与硬件已经无关了，这个Interface主要可以<strong>配置收发队列</strong>；<strong>组帧</strong>(FlexRay);<strong>管理</strong>时间触发总线的<strong>调度表</strong>(LIN,FlexRay)</p>
+<p>CAN Driver:就是MCAL中对主芯片上<strong>CAN</strong>模块的<strong>驱动</strong>封装</p>
+<p>Trcv Driver: Trcv-Transceiver 的缩写，就是<strong>收发器驱动</strong>的意思。如果是外置CAN收发器，这里就要用到Trcv Driver 驱动</p>
+<h3><a id="1CAN_35"></a>1.CAN分层活动</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/48f61ef29ca14652b87d38d1d08177d8.png"/><br/> 从AUTOSAR架构上来说，一个完整的CAN通信的过程涉及到了包括硬件、AUTOSAR中间件和上层应用层软件；</p>
+<pre><code>    在硬件部分来说，涉及到的是CAN总线和CAN收发器；
+
+    软件部分涉及到的概念是MCAL(微控制器抽象层)、BSW(基础软件层)、RTE(实施运行环境)、APPL(应用层)等。其中MCAL部分用到了通信驱动模块，而BSW部分使用到了通信服务模块和通信硬件抽象模块；
+</code></pre>
+<p><strong>1 交互层</strong><br/> IPDU multiplexer:协议数据单元复用模块</p>
+<p>COM：COMMUNICATION通信模块</p>
+<p>DCM：诊断通信管理模块(Diagnostaic Communication Manager)</p>
+<p>PDUR:Protocol Data Unit Router PDU路由器</p>
+<p><strong>2 网络层</strong><br/> CAN TP：CAN Transport Layer</p>
+<p>CAN TP提供的服务包括：传输方向的数据分割、接收方向的数据重组、数据流控制、检测分割会话中的错误、传输取消接收取消</p>
+<p>J1939 TP：给予J1939协议的CAN TP，J1939Tp模块实现了SAEJ1939标准中的两种数据传输方式BAM和CMDT</p>
+<p><strong>3 数据链路层</strong><br/> CAN Interface:CAN 接口层(CanIf)是访问CAN总线的标准接口</p>
+<p><strong>4 物理层</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/73cfb5927dd14e7cb0e5c8f0be564508.png"/></p>
+<p>CAN Driver：CAN驱动，可以实现对CAN控制器的初始化、发送/接收CAN报文、对接收报文的指示与对发送报文的确认、唤醒检测、溢出和错误处理等功能。</p>
+<p>CAN Controller:CAN 控制器</p>
+<p>CAN Transceiver Driver:CAN收发器驱动程序抽象了CAN收发器硬件。它为较高层提供了一个独立于硬件的接口。它利用MCAL层的API从ECU布局中抽象出来，访问CAN收发硬件。</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/f84419fc93a44be88a3b9b1af84a6d80.png"/><br/> <strong>收发器选择</strong><br/> NXP TJA1145A 5Mbps 支持选择唤醒<br/> TI TCAN1145 5Mbps 支持选择唤醒</p>
+<p>控制器收发器要求满足ISO11898<br/> ECU在CANFD总线通信中,依据部署位置不同分为终端节点不和非终端节点。在CANFD总线物理<br/> 线束中距离最远的两个节点称为终端节点,其余支线连接的节点称为非终端节点。<br/> 节点是否需要安装终端电阻由网络架构相关工程师决定,所有IECU的PCB板上应预留终端电阻的安装位置。<br/> <strong>5 硬件部分</strong><br/> CANTransceiver:CAN 收发器，是一种硬件设备，可将CAN总线上使用的信号电平调整为微控制器识别的逻辑(数字)信号电平。</p>
+<p>CAN High:CAN总线高电平</p>
+<p>CAN Low:CAN总线低电平</p>
+<p>CAN network：AUTOSAR CAN网络管理是一个独立于硬件的协议，只能在CAN上使用(没明白)。其主要目的是协调网络从正常运行到总线休眠模式的过渡</p>
+<p><strong>6 传输数据类型</strong><br/> signals:信号</p>
+<p>PDU：Protocol Data Unit协议数据单元，PDU由SDU和PCI组成</p>
+<p>I-PDU：Interaction Layer PDU，由Data、length、I-PDU ID组成</p>
+<p>N-PDU：Network Layer PDU，或I-PDU Segment,由传输协议模块使用，对I-PDU进行分段</p>
+<p>L-PDU：Data Link Layer PDU,或Large PDU,一个或多个I-PDU被打包成L-PDU，L-PDU是基于总线的，例如CAN总线的L-PDU就是CAN帧</p>
+<p>Message:报文</p>
+<h3><a id="2_110"></a>2.收发控制流(节点发送数据举例)</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/a00cce77b7cd414dab409dbfbc95a235.png"/></p>
+<ul><li> <p>应用层Send一个数据进COM</p> </li><li> <p>COM写信号进PDU Buffer中</p> </li><li> <p>PDU被PDU Router立刻发送或按周期发送(每个PDU都有一个独立的ID)，之后PDU Router辨认总线种类，并把PDU发向不同的下级模块</p> </li><li> <p>Interface根据不同的通道，把报文写入不同的队列</p> </li><li> <p>Driver根据报文的优先级立刻发送报文</p> </li></ul>
+<h3><a id="3_138"></a>3.报文帧详解</h3>
+<p>ECU 在通信和诊断中应使用标准帧。ECU 不可发送和响应远程帧、扩展帧，当总线上有远程帧和扩展帧发送时，ECU 接收后不做处理且不发出错误帧。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/b2b24597a0ed47f59d9a25c6fb249d3e.png"/><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/d49484b255d04002ac28c9207966fea9.png"/></p>
+<h3><a id="4_141"></a>4.报文发送方式</h3>
+<p><strong>周期型（Cycle）</strong><br/> 报文按照一定周期时间发送，周期时间参考矩阵中“报文周期时间”参数。例：报文发送类型定义为 Cycle，报文周期时间定义为 T。<br/> <strong>事件型（Event）</strong><br/> 当事件发生时，报文立即发送，报文发送次数和发送时间间隔参考矩阵中的“报文快速发送的次数”和“报文发送的快速周期”参数。<br/> <strong>使能型（Ifactive）</strong><br/> 当报文中所有信号均为使能型信号，且某一信号等于使能值时，报文进行发送，发送时间间隔参考矩阵中的“报文发送的快速周期”；当使能信号均从使能值切换为非使能值时，报文继续发送几帧，发送的次数和时间间隔参考矩阵中的“报文快速发送的次数”和“报文发送的快速周期”参数。信号的非使能值参考矩阵中的“非使能值”参数。</p>
+<h3><a id="5_148"></a>5.报文数据长度及填充</h3>
+<p>CANFD 网络上，数据帧的数据长度 DLC 可以是 8/12/16/20/24/32/48/64, 供应商须按照通信矩阵中定义的标识符和 DLC 进行报文的发送，其它未定义的标识符和 DLC 不应发送。当 ECU 接收到 DLC 不同于预定义的数据帧时，应忽略该报文，并对 CAN 总线不产生任何影响。<br/> 报文数据场的字节填充格式采用 <strong>Motorola 格式</strong>，信号的起始位从最低有效字节（LSB）的最低有效位（lsb）开始。应用报文中未使用（预留）的字节默认填充 0x00，未使用（预留）的信号位默认填充 0x0。<br/> <strong>Busoff</strong><br/> 避免 ECU 因自身故障影响其它正常节点通信，ISO11898-1 规定每个 CANFD 控制器都有一个<strong>发送错误计数器</strong>和<strong>接收错误计数器</strong>。<br/> 主动错误状态（error active）：节点正常参与通信，当检测到错误时，发送主动错误标志。<br/> 被动错误状态（error passive）：节点正常收发报文，当检测到错误时，发送被动错误标志。<br/> 总线关闭状态（bus off）：节点因总线故障或自身严重问题进入总线关闭状态，该状态下无数据收发。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/9f70efe8840f4bb09645139e71fe9d56.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/c36408bb6e6c41e59eb9adee04ab7b58.png"/>节点发生 Busoff 时，先快恢复再慢恢复。连续发生 5 次 Busoff 快恢复后，若此时又发生 Busoff就进入慢恢复<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/6a2e9c9f8e3a4781aa0d05ebcbb88775.png"/><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/932c108d4dfe4fb68bdb2b9f8e61b103.png"/></p>
+<h3><a id="6_160"></a>6.故障</h3>
+<p><strong>网络相关的诊断</strong>包括工作电压诊断、总线 Busoff 故障诊断、节点丢失故障诊断、报文错误故障诊断、报文 Checksum 校验错误诊断、及报文计数器错误诊断。当 ECU 上电或被网络管理报文唤醒 T_DiagStart 后，ECU 开始网络相关的诊断。当 ECU 工作电压从欠压或过压恢复到正常诊断电压范围内，需从电压恢复时刻开始 T_DiagRecover 时间内恢复诊断功能。</p>
+<p><strong>Busoff 故障</strong>故障记录条件：诊断功能开启情况下，当 ECU 连续发生 Busoff 8 次，且没有报文成功发送，需记录 Busoff DTC。故障恢复条件：ECU 成功发送一帧报文后，即认为 Busoff 故障恢复。</p>
+<p><strong>节点丢失故障</strong> ECU 需对与自身功能处理或物理总线直连的相关 ECU 进行节点超时监测。ECU 供应商可选择所接收的相关 ECU 的任意一条周期最小的报文进行监控，或选择任意一条对功能影响较大的关键周期型（或周期事件型）报文进行监控，或选择多条（或所有）的周期型（或周期事件型）报文进行监控。当选择多条（或所有）的周期型（或周期事件型）报文进行监控时，应在所有监控报文都超时后方可记录节点丢失故障。</p>
+<p><strong>报文错误故障</strong>（可选）节点应能够检测报文自身故障，如位错误、CRC 错误、界定符错误等。</p>
+<p><strong>报文 Checksum 校验错误</strong>报文 Checksum 算法，依据不同车型要求另行定义。</p>
+<p><strong>总线故障</strong><br/> <strong>本地故障</strong>网络中所有 ECU 必须有容错性能。1) ECU 任何内部错误都不能影响总线通信（e.g.发送错误帧或者把总线钳位在“显性”状态）；2) 总线错误帧不能影响 ECU 内部功能，也不能把 ECU 置于不安全状态；3) ECU 启动期间，不应干扰其他 ECU 的正常通信；<br/> <strong>全局故障</strong>总线发生以下全局故障时，CAN 通信通常会受到干扰。</p>
+<h2><a id="CAN_176"></a>二、CAN通讯栈配置(从底层往上)</h2>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/532fb2835fcb45f4a9727d129d024cac.png"/></p>
+<h3><a id="1CANCanConfigSet_179"></a>1.CAN模块配置CanConfigSet</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ee3ad2127b014bfcbf2eb5e9cc202110.png"/></p>
+<p>CAN模块主要是CAN控制器模块包含：CAN控制器、CAN硬件对象、CAN主函数周期；上图所示为DaVinci Configurator中CAN模块的配置容器</p>
+<p>CanConfigSet是CAN模块的二级配置容器，包含CAN控制器和CAN硬件对象</p>
+<h4><a id="CanControllers_185"></a>CanControllers</h4>
+<p>CanControllers三级配置容器包含所有CAN控制器配置，根据实际使用的CAN控制器硬件数量配置对应的个数。下图所示是一个对应硬件CAN控制器的配置容器包含项，包含：波特率和过滤器掩码<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/9894890da4f249318624d1a0843d5824.png"/><br/> CAN控制器通用参数配置<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/f79a882bbc7f4eb788942e86feb675e5.png"/><br/> 其中需要特别注意的都已用红圈标明。其余配置项不是不重要，而是这些配置项有些是默认，有些是在 MCAL 导入达芬奇工具的 arxml 中已确定，属于预条件（比如，通过 EB 后，再导入达芬奇），这里不做过多详述。<br/> 这里需要注意的第一个是 Can 控制器的地址（Controller Base Address），即<strong>在 MCU 的寻址空间上，该控制器的位置</strong>，现在使用的 Microp，基本都是内置 Can 控制器的，可以直接查芯 Microp 芯片手册获取该参数。<br/> 第二个是波特率选择，这里这个波特率是引用了子配置项波特率的配置。即实际波特率配置是在 CanControllerBaudrateConfig 容器配置的，这里仅仅是引用之。<br/> 第三个是时钟选择，这里引用自 Mcu 模块配置的给 Can 模块使用的时钟；<br/> 第四个是 TxRx 处理方式，这里有两种选择，分别是中断式和轮询式，具体采用哪种方式，视具体项目需求而定；<br/> 第五个是唤醒处理方式，也分为中断和轮询两种方式，具体视项目需求而定；<br/> 第六个是唤醒源选取，唤醒源来自 EcuM，这里仅是选取使用，具体后续在 EcuM 中做介绍；</p>
+<h5><a id="CanControllerBaudrateConfig_197"></a>CanControllerBaudrateConfig</h5>
+<p>波特率配置如下所示，具体每个参数及其意义，可查 CAN 通信原理，这里不做赘述。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/85178a3212f54b01a525390f3dfae1ad.png"/></p>
+<h5><a id="CanFilterMask_200"></a>CanFilterMask</h5>
+<p>在本容器进行过滤掩码配置，没有过多需要介绍的。</p>
+<h4><a id="CanHardwareObjects_202"></a>CanHardwareObjects</h4>
+<p>CanHardwareObjects 包含了项目使用的 MailBox 数量及其配置。关于具体最多可以配置多少个 Can 硬件对象具体要参考所使用的 Can 控制器硬件手册，Can 控制器硬件手册会说明该 Can 控制器最多支持多少个 CanMailBox。MailBox 分为接收和发送两种发送 Can 硬件对象如下所示：<br/> <strong>发送型：</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/19da58b9562443b8965f3997ed2ced6d.png"/><br/> <strong>接收型：</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/8b0eb04eaa164219951863cc6227d648.png"/><br/> 这里配置上需要注意有以下：</p>
+<ul><li>Controller Ref，引用 CanController 容器配置的 Can 控制器，表示该 MailBox 属于那个 Can 控制器；</li><li>Handle Type，有 BASIC 和 FULL 两种，表示该 MailBox 服务于的 CAN 类型，具体这两种 CAN 类型的区别，参考 CAN 基础知识，此处不做赘述；</li><li>Id Type，表示该 MailBox 可用于处理的 CAN ID 类型，有三种，分别为 EXTENDED、MIXED 和 STANDARD，分别代表了扩展帧 CAN 报文（29bit-id）、混合 CAN 报文（扩展帧和标准帧都可以）和标准帧 CAN 报文（11bit-id）；</li><li>d Value，在 FULL 类型的 Can 硬件对象中，该值表示本 Can MailBox 处理的 Can Id。在 BASIC 类型的 Can 硬件对象中，该值结合 Filter Mask 用于报文过滤；</li><li>Object Type，分为 TRANSMIT 和 RECEIVE，用于定义该 Can 硬件对象是用于报文发送的 MailBox 还是用于接收 MailBox；<br/> Filter Mask Ref，引用 CanController 中定义的过滤掩码；</li></ul>
+<h4><a id="CanGeneral_217"></a>CanGeneral</h4>
+<p>CanGeneral 是 Can 模块的通用配置容器，包含了许多配置参数。根据不同的芯片，配置项未必完全相同，此处参考的是 Infineo TriCore 平台。<br/> Change Baudrate Api，定义 Can_ChangeBaudrate Api 是否使能；<br/> Counter Ref，引用 Os 模块定义的 OS Counter，用于本模块；<br/> Dev Error Detection，DET 使能开关；<br/> Ecc Init，指定 Can 驱动是否初始化 Can 报文 RAM，当报文 RAM 使用了 parity 或 ECC 功能，建议硬件复位后初始化报文 RAM；<br/> Enable optimizations for hardware buffer lengths，如果选中此项，FULL 的硬件缓冲区将被限制为要接收的实际消息的长度。一般来说，这可以节省硬件资源，但如果收到较长长度的 CAN-FD 消息，它们可能会被驱动程序丢弃。如果禁用此功能，硬件缓冲区将被配置为能够接收所有消息长度的最大值。<br/> FD NISO，指定 CAN-FD 帧格式一致性（ISO11898-1 或博世 CAN FD V1.0）；<br/> Fd Support，指定支持的 CAN FD 类型，NONE 表示不支持，BRS 表示支持，且 DLC 最大为 8 字节，FULL 表示支持，且 DLC 最大为 64 字节；<br/> Generic Confirmation，定义是否使用通用确认函数；<br/> Generic Confirmation API，此参数更改 CanGenericConfirmation 的签名，以支持总线镜像（第二种使用情形是支持 CDD 镜像组件进行总线镜像，另请参见 CanMirrorModeSupport。）<br/> Generic Pre Transmit，此参数定义是否为所有 Tx 消息调用通用的预传输函数。在发送消息之前，使用此选项可更改数据或中止传输。<br/> Generic Precopy，此参数定义是否调用通用预拷贝函数。如果使能，任何 Rx 事件都会调用该函数。<br/> Get Status，该参数定义是否使能 API Can_GetStatus ()；<br/> Hardware Cancel By Api，该函数定义是否可以取消循环 (loop) 检查，仅当 CanHardwareLoopCheck 使能时才可使用；<br/> Hardware Loop Check，该参数使能硬件 loop 检查，以避免死循环（仅在硬件支持时才可用）；<br/> Interrupt Category，如果采用中断式处理，指定所采用的中断等级；<br/> Interrupt Lock，该参数指定由谁处理中断，可以是 DRIVER_API 或 BOTH；<br/> Main Function Busoff Period[ms]，指定函数 Can_MainFunction_Busoff 的调用周期；<br/> Main Function Mode Period[ms]，指定函数 Can_MainFunction_Mode 的调用周期；<br/> Main FunctionWakeup Period[ms]，指定函数 Can_MainFunction_Wakeup 的调用周期；<br/> Multiple Basic CAN Object，当使用多个基本 CAN 硬件消息来优化接收时激活该选项。这允许使用更多硬件消息过滤器和硬件消息缓冲区（仅在硬件支持时才有效）。<br/> Multiple Basic CAN TX Object，当使用多个 TX 基本 CAN 硬件消息优化传输时激活该理想。这允许使用更多硬件消息缓冲区（仅在硬件支持时才有效）。<br/> Reinitialization While Start Transition，该选项定义是否在启动传输时执行整个处理器初始化（包括硬件 Rx 和 Tx 邮箱和控制寄存器等）</p>
+<h5><a id="CanMainfunctionRWPeriods_241"></a>CanMainfunctionRWPeriods</h5>
+<p>对于采用轮询方式处理 Can 报文处理的场景，CanMainfunctionRWPeriods 容器用于定义函数 Can_MainFunction_Read 和 Can_MainFunction_Write 的执行周期。<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/468d038b3fa14176a81414d9019ebc3c.png"/></p>
+<h4><a id="_244"></a>总结</h4>
+<p>以上就是 Davinci Cfg Configurator 中关于 Can 模块的配置介绍。<br/> 这个模块主要进行 <strong>Can 控制器相关参数</strong>和 <strong>Can 模块的 Tx 和 Rx 的 MailBox 配置</strong>，至于 <strong>CanGeneral 的配置，一般保持默认</strong>即可。另外关于轮询式 Can 报文处理的周期定义，仅在配置为轮询式处理方式时才需要，对于配置为中断式的，空置即可。<br/> 这个模块可以理解为是 AUTOSAR 架构下 Can 通信的最低层（暂不考虑 MCAL），直接与 CanBus 交互。</p>
+<h2><a id="CANC_248"></a>三、项目实战CAN收发链路C代码实现</h2>
+<h3><a id="1_AUTOSAR__CAN__249"></a>1 宏观视角AUTOSAR 的 CAN 通信分层</h3>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/532fb2835fcb45f4a9727d129d024cac.png"/><br/> 在深入代码前，我们先看一眼底层的“快递分发”流程（自下而上）：</p>
+<p><strong>1 CanTrcv / CanDrv（物理层 &amp; 硬件驱动层）</strong>：负责把物理总线上的高低电平（如 2.5V/3.5V）翻译成数字信号（0 和 1），并按帧存入单片机的 CAN 邮箱（Mailbox）。<br/> <strong>2 CanIf（CAN 接口层）</strong>：屏蔽不同单片机硬件的差异，向上一层提供统一的 CAN 帧（PDU）处理接口。<br/> <strong>3 PduR（PDU 路由层）</strong>：相当于快递分拣中心。它看一眼报文：如果是诊断请求，扔给 Dcm 模块；如果是网络管理报文，扔给 CanNm；如果是普通业务数据，扔给 Com 模块。<br/> <strong>4 Com（通信服务层，核心！）</strong>：负责把一整帧报文（如 8 字节或 64 字节）拆解/打包成一个个具体的信号（Signal），比如规定第 3 个字节的前 4 位代表电压。<br/> <strong>5 App / ComUsr（应用层 / 通信用户接口）</strong>：负责执行安全校验、超时监控，并把原始数据转换成业务需要的物理值，最终去做决策。</p>
+<h3><a id="2__API__261"></a>2 底层 API 调用级的完整流转路线图</h3>
+<p>我们以经典的 CAN 通信 为例，分“发送（Tx）”和“接收（Rx）”两条链路来剖析。</p>
+<h4><a id="Tx_Flow_264"></a>报文发送流程（Tx Flow：从应用层到物理总线）</h4>
+<p>发送的核心思想是：“异步解耦”。应用层只要把数据往 Buffer 里一塞就可以不管了，真正把数据搬运到硬件上发出去的，是底层的周期任务（MainFunction）。</p>
+<p><strong>完整函数流转序列：</strong></p>
+<p><strong>1 App / ComUsr 层：写入缓存</strong></p>
+<p>动作：在 ComUsr_CDU_DCDC_1_0x467_100_COMBO_GWAY_Tx 任务中调用 Com_SendSignal() 或 Rte_Write()。<br/> 底层行为：这步不会触发报文发送！它<strong>仅仅是把数据</strong>（比如 138 这个电压值）<strong>写到了 Com 模块的内部 RAM 缓存</strong>（Shadow Buffer）中。</p>
+<p><strong>2 Com 模块：周期打包（触发点）</strong></p>
+<p>动作：系统底层的 OS 会周期性（比如每 5ms 或 10ms）调用 Com_MainFunctionTx()。<br/> 底层行为：这个大管家会去查所有的发件箱。它发现 0x467 这个 PDU（Protocol Data Unit，即 CAN 帧）的 100ms 发送周期到了，于是它把之前所有 Com_SendSignal 填进来的零碎 Signal 拼装成一个完整的 8 字节 PDU。<br/> 向下传递：拼装完成后，Com 调用下层接口： <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+    
+     
+      
+       
+        →
+       
+      
+      
+       \rightarrow
+      
+     
+    </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> PduR_ComTransmit(PduId, &amp;PduInfo)</p>
+<p><strong>3 PduR 模块：简单路由</strong></p>
+<p>动作：PduR (PDU Router) 发现这个 PDU 的目的地是 CAN 总线。<br/> 向下传递：直接透传调用： <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+    
+     
+      
+       
+        →
+       
+      
+      
+       \rightarrow
+      
+     
+    </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> CanIf_Transmit(CanIf_PduId, &amp;PduInfo)</p>
+<p><strong>4 CanIf 模块：软硬件映射</strong></p>
+<p>动作：CanIf (CAN Interface) 负责把纯软件的 PDU ID（比如 ID 5）映射到物理的 CAN Controller 和真实的 CAN ID（0x467）。如果有硬件发送队列，它还会做软件缓存。<br/> 向下传递：调用处于最底层 MCAL 的硬件驱动： <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+    
+     
+      
+       
+        →
+       
+      
+      
+       \rightarrow
+      
+     
+    </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> Can_Write(Hth, &amp;PduInfo)</p>
+<p><strong>5 Can 模块 (MCAL) 与硬件：填入邮箱</strong></p>
+<p>动作：Can_Write 函数会直接操作 AURIX 单片机的寄存器（MultiCAN+ 模块）。它将 0x467、DLC（8）以及那 8 个字节的 Payload，直接写入到芯片硬件的 Tx Mailbox（发送邮箱）中。<br/> 发送：硬件仲裁通过后，这帧报文化作高低电平，飞向总线。</p>
+<p><strong>6 Tx Confirmation（发送回执 - 自下而上）</strong></p>
+<p>动作：当报文成功发到总线上后，单片机触发一个 硬件发送中断 (Tx ISR)。<br/> <strong>流转：Can_TxInterrupt() <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+     
+      
+       
+        
+         →
+        
+       
+       
+        \rightarrow
+       
+      
+     </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> CanIf_TxConfirmation() <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+     
+      
+       
+        
+         →
+        
+       
+       
+        \rightarrow
+       
+      
+     </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> PduR_TxConfirmation() <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+     
+      
+       
+        
+         →
+        
+       
+       
+        \rightarrow
+       
+      
+     </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> Com_TxConfirmation()。</strong><br/> 结果：Com 模块知道“快递已签收”，清除发件标志，准备下一个周期的发送。</p>
+<h4><a id="Rx_Flow_302"></a>报文接收流程（Rx Flow：从物理总线到应用层）</h4>
+<p>接收的核心思想是：“中断打底，任务收尾”。底层的中断只负责把数据抢救到 RAM 里，解包和处理全靠 OS 的周期任务。</p>
+<p><strong>完整函数流转序列：</strong></p>
+<p><strong>1 硬件与 Can 模块 (MCAL)：硬件过滤与中断</strong></p>
+<p>动作：总线来了一帧 0x191 报文。AURIX 的 MultiCAN+ 硬件过滤器发现这是自己需要的 ID，将其存入 Rx Mailbox（接收邮箱），并立刻触发一个 硬件接收中断 (Rx ISR)。<br/> 向上传递：中断服务函数快速读取寄存器，把数据搬进局部变量，然后调用： <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+    
+     
+      
+       
+        →
+       
+      
+      
+       \rightarrow
+      
+     
+    </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> CanIf_RxIndication(Hrh, CanId, Dlc, PduInfoPtr)</p>
+<p><strong>2 CanIf 与 PduR：验证与分发</strong></p>
+<p>动作：CanIf 确认数据长度无误后，把硬件的 HRH（硬件句柄）转换成软件的 RxPduId。<br/> 向上传递： <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+    
+     
+      
+       
+        →
+       
+      
+      
+       \rightarrow
+      
+     
+    </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> PduR_CanIfRxIndication(PduId, PduInfoPtr) <span class="katex--inline"><span class="katex"><span class="katex-mathml">
+    
+     
+      
+       
+        →
+       
+      
+      
+       \rightarrow
+      
+     
+    </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.3669em;"></span><span class="mrel">→</span></span></span></span></span> Com_RxIndication(PduId, PduInfoPtr)</p>
+<p><strong>3 Com 模块：中断上下文的快速存缓存</strong></p>
+<p>动作：此时我们依然处于（或刚刚退出）中断上下文中！因此 Com_RxIndication 绝对不会去做复杂的浮点数运算。它只做一件事：把这 8 个字节的报文拷贝到 Com 模块的内部 Rx Buffer 中，并立起一个“有新数据到达”的 Flag。<br/> (注：如果配置了 Callout，您的 E2E_0x191_VCU_CDU_3…Rx_PDUCallback 会在此刻被调用，去校验 CRC)。</p>
+<p><strong>Com 模块：周期性解包（后台管家）</strong></p>
+<p>动作：OS 周期性调度 Com_MainFunction_Rx()。<br/> 底层行为：它扫描到 Rx Buffer 里有新鲜的 0x191，于是按照 DBC 矩阵的定义，把这 8 个字节拆成一个个 Signal。同时它还会刷新这个报文的 Timeout 定时器（防止触发掉线故障）。</p>
+<p><strong>App / ComUsr 层：取走数据</strong></p>
+<p>动作：您的 10ms 周期任务 ComUsr_vidQMRunnable_10ms 开始运行。<br/> 获取：调用 Com_ReceiveSignal() 或 Rte_Read()。<br/> 结果：此时，您拿到的是 Com 模块早就为您拆解并准备好的、热乎的数据。接下来您乘以分辨率（Factor），就得到了 14.2V 的物理值。<br/> 三、 图解：一图胜千言<br/> 我们可以把这个过程想象成一个“跨国邮政系统”：</p>
+<p>text<br/> 【发送方：你的代码】 【接收方：你的代码】<br/> | ^<br/> v (Com_SendSignal) | (Com_ReceiveSignal)<br/> ±---------------+ ±---------------+<br/> | Com (打包站) | | Com (拆包站) | &lt;-- 解包 / 超时监控<br/> ±---------------+ ±---------------+<br/> | (PduR_ComTransmit) ^ (Com_RxIndication)<br/> v |<br/> ±---------------+ ±---------------+<br/> | PduR (中转站) | | PduR (中转站) | &lt;-- 分发给Diag/Nm/Com<br/> ±---------------+ ±---------------+<br/> | (CanIf_Transmit) ^ (PduR_CanIfRxIndication)<br/> v |<br/> ±---------------+ ±---------------+<br/> | CanIf (翻译官) | | CanIf (翻译官) | &lt;-- 硬件ID转软件ID<br/> ±---------------+ ±---------------+<br/> | (Can_Write) ^ (CanIf_RxIndication)<br/> v |<br/> ±---------------+ ±---------------+<br/> | Can (快递员) | | Can (快递员) | &lt;-- Rx 中断触发<br/> ±---------------+ ±---------------+<br/> | ^<br/> v CAN 物理总线 |<br/> 硬件 TX ========================&gt; 硬件 RX</p>
+<p>为什么 AUTOSAR 要搞得这么复杂？<br/> 看到这里，您可能会觉得：“以前裸机开发，我直接在 CAN Rx 中断里解析数据不香吗？为什么要绕 5 层？”</p>
+<p>AUTOSAR 这么设计是有其深刻原因的：</p>
+<p><strong>防阻塞</strong>：CAN 中断的优先级极高，如果在中断里做解包、乘除法甚至 E2E 校验，一旦总线负载率达到 80%，单片机连 OS 任务都调度不过来了。<br/> <strong>硬件解耦</strong>：今天项目用的是英飞凌 TC364（CAN），明天如果要移植到瑞萨芯片，甚至通信介质换成 LIN（如您项目中看到的 Lin_17_AscLin）或以太网（Eth），应用层代码连一个标点符号都不需要改！底层只需替换 CanDrv 为 LinDrv，上面的 Com 和 PduR 依然如常工作。</p>
+<h3><a id="3_Rx_Flow_369"></a>3 应用层完整详细接收流程（Rx Flow）</h3>
+<p>假设现在 VCU（整车控制器）通过 CAN 往 CDU 发送了一帧指令报文 VCU_CDU_3 (ID: 0x191)，周期是 10ms。</p>
+<p><strong>第 1 步：底层送达与 E2E 安全校验 (Callout)</strong><br/> 为了符合主机厂的 ISO 26262 功能安全规范，关键报文通常带有 E2E（End-to-End）保护。当底层的 Com 模块收到 0x191 报文，准备拆包之前，会先触发一个回调函数让您检查这包“快递”有没有被拆过或者是不是旧包裹。</p>
+<pre><code class="prism language-c"><span class="token function">FUNC</span><span class="token punctuation">(</span>boolean<span class="token punctuation">,</span> COM_APPL_CODE<span class="token punctuation">)</span> <span class="token function">E2E_0x191_VCU_CDU_3_oPublic_CAN_a11ed0da_Rx_PDUCallback</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+   <span class="token comment">// 1. 提取对方发过来的 滚动计数器(Rolling Counter)</span>
+   Loc_u8TempCounter <span class="token operator">=</span> <span class="token punctuation">(</span>PduInfoPtr<span class="token operator">-&gt;</span>SduDataPtr<span class="token punctuation">[</span>COMUSR_VALUE_1<span class="token punctuation">]</span> <span class="token operator">&amp;</span> COMUSR_MASK_0x0F<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+   <span class="token comment">// 2. 调用 AUTOSAR 标准的 E2E_P01Check 进行 CRC 校验和计数器连续性检查</span>
+   <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token function">E2E_P01Check</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ComUsr_P01Crc<span class="token punctuation">,</span> <span class="token operator">&amp;</span>ComUsr_astrRxCntDara<span class="token punctuation">[</span>ComUsr_enuID_0x191<span class="token punctuation">]</span><span class="token punctuation">.</span>ComUsr_P01RxCounter<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+   <span class="token comment">// 3. 如果校验失败（比如被人篡改了，或者掉帧了），记录错误状态</span>
+   <span class="token keyword">if</span> <span class="token punctuation">(</span>E2E_P01STATUS_WRONGCRC <span class="token operator">==</span> ComUsr_astrRxCntDara<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span><span class="token punctuation">.</span>Status<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+      ComUsr_astrRxDataInfo<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span><span class="token punctuation">.</span>CRCErrorStatus <span class="token operator">=</span> TRUE<span class="token punctuation">;</span>
+   <span class="token punctuation">}</span>
+   <span class="token keyword">return</span> TRUE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<p><strong>第 2 步：提取信号 (Signal)</strong><br/> E2E 校验通过后，工程里每 10ms 调度一次的 XX_vidQMRunnable_10ms 任务中，会去提取这帧报文里具体的信号。</p>
+<pre><code class="prism language-c"><span class="token function">FUNC</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">,</span> ComUsr_CODE<span class="token punctuation">)</span> <span class="token function">ComUsr_VCU_CDU_3_0x191_10_Rx</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+   <span class="token comment">// 使用标准 API Com_ReceiveSignal，从底层 Com 模块的缓存中把所需的信号值抠出来</span>
+   <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token function">Com_ReceiveSignal</span><span class="token punctuation">(</span>ComConf_ComSignal_VCU_DCDCVoltageSetPoint_oVCU_CDU_3_oPublic_CAN_66d817f9_Rx<span class="token punctuation">,</span> <span class="token operator">&amp;</span>ComUsr_u8VcuDCDCVoltageSetPoint<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</code></pre>
+<p><strong>第 3 步：转换成物理值 (Scaling)</strong><br/> 总线上跑的只能是无符号整数（如 0~255）。主机厂的 DBC（通信矩阵）会定义每个信号的 分辨率（Factor） 和 偏移量（Offset）。应用层拿到原始值后，要算成物理值：</p>
+<pre><code class="prism language-c">   <span class="token comment">// 物理值 = 原始整数 * 分辨率(0.1) + 偏移量(0)</span>
+   <span class="token comment">// 比如 VCU 要求设定电压，发来原始值 142，乘 0.1 后，就是 14.2 伏特</span>
+   ComUsr_f32VcuDCDCVoltageSetPoint <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>float32<span class="token punctuation">)</span><span class="token punctuation">(</span>ComUsr_u8VcuDCDCVoltageSetPoint<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> COMUSR_ACC_0P1 <span class="token operator">+</span> COMUSR_OFFSET_0<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<p><strong>第 4 步：报文丢失监控 (Timeout Monitoring)</strong><br/> 如果线束断了，VCU 不发报文了怎么办？肯定不能一直用旧的 14.2V 去执行输出。 如果定时器发现太久没收到 0x191，就会向 DEM（诊断事件管理模块）上报故障：</p>
+<pre><code class="prism language-c">   <span class="token function">ComUsr_MsgLostHandler</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ComUsr_astrRxDataInfo<span class="token punctuation">[</span>ComUsr_RxDataInfo_0x191<span class="token punctuation">]</span><span class="token punctuation">,</span> \
+      <span class="token punctuation">(</span>Dem_EventIdType<span class="token punctuation">)</span><span class="token punctuation">(</span>DemConf_DemEventParameter_Lost_Communication_With_VCU<span class="token punctuation">)</span><span class="token punctuation">,</span>\ <span class="token comment">// 报 U014087 通信丢失故障</span>
+      <span class="token operator">&amp;</span>ComUsr_pstrTimer<span class="token punctuation">[</span>TMR_COMUSER_VCU_COM_1_LOST_MSG_490MS<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>状态机一旦查到这个故障，就会立马跳进 FAULT 或 STANDBY 状态，确保整车安全。</p>
+<h3><a id="4_Tx_Flow_423"></a>4 应用层完整详细发送流程（Tx Flow）</h3>
+<p>现在反过来， CDU 自己测量到了 DCDC 模块输出的低压侧电压，需要打包成一帧名为 CDU_DCDC_1 (ID: 0x467) 的报文发给 VCU。</p>
+<p><strong>第 1 步：物理值反算成原始值</strong><br/> 在 100ms 发送任务 ComUsr_CDU_DCDC_1_0x467_100_COMBO_GWAY_Tx 中，先去取真正的物理电压（比如内部测量到的是 13.8V），除以精度反算成无符号整数（变成 138）：</p>
+<pre><code class="prism language-c">   ComUsr_f32DcdcLvSideVolt   <span class="token operator">=</span> AnPhyCalcSafe_f32DCDCLvU<span class="token punctuation">;</span> <span class="token comment">// 取底层模拟采集算出来的实际电压物理值</span>
+   ComUsr_u16DcdcLvSideVolt   <span class="token operator">=</span> <span class="token punctuation">(</span>uint16<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>ComUsr_f32DcdcLvSideVolt<span class="token punctuation">)</span> <span class="token operator">/</span> COMUSR_ACC_0P1<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 除以0.1变整数</span>
+</code></pre>
+<p><strong>第 2 步：硬性限幅保护 (Clamping) —— 主机厂极其看重！</strong></p>
+<p>这也是量产代码和玩具代码的区别。如果硬件 ADC 传感器坏了，读到了一个 10000V 的荒谬值，除以 0.1 直接发出去，会导致接收方（比如仪表的里程续航计算）彻底崩溃。因此，发出去的信号必须卡在 DBC 规定的最大/最小值范围内。</p>
+<pre><code class="prism language-c">   <span class="token comment">// 限制最大值绝不能超过 253 (即 25.3V)</span>
+   ComUsr_u16DcdcLvSideVolt   <span class="token operator">=</span> <span class="token function">MATHSRV_udtMIN</span><span class="token punctuation">(</span>ComUsr_u16DcdcLvSideVolt<span class="token punctuation">,</span> COMUSR_VALUE_253<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p><strong>第 3 步：送入 Com 缓存</strong><br/> 把限制好的安全整数交回给底层：</p>
+<pre><code class="prism language-c">   <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token function">Com_SendSignal</span><span class="token punctuation">(</span>ComConf_ComSignal_DCDC_LvSideVolt_oCDU_DCDC_1_<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>ComUsr_u16DcdcLvSideVolt<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>注意： 调用 Com_SendSignal 并不会立刻就把报文发到 CAN 线上！它仅仅是把 138 这个值写到了 Com 模块的内存 Buffer 里。底层的 Com 模块自己有一个定时器，只要这帧报文配置的是 100ms 发送周期，时间一到，Com 就会把 Buffer 里拼好的这一整包 8 字节一起打出去。<br/> <strong>第 4 步：发车前的最后动作（E2E 打包加密）</strong><br/> 在底层真正把报文射出单片机前的一瞬间，会再调用您的 Tx Callout。在这里给包裹“贴上自己的防伪封条”：</p>
+<pre><code class="prism language-c"><span class="token function">FUNC</span><span class="token punctuation">(</span>boolean<span class="token punctuation">,</span> COM_APPL_CODE<span class="token punctuation">)</span> <span class="token function">E2E_0x467_CDU_DCDC_1_oPublic_CAN_a644bfb8_Tx_PDUCallback</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span>
+<span class="token punctuation">{<!-- --></span>
+   <span class="token comment">// 1. 根据当前报文Buffer里的最新数据，计算出一个新的 CRC 校验和</span>
+   <span class="token function">E2E_P01Protect</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>ComUsr_P01Crc<span class="token punctuation">,</span> <span class="token operator">&amp;</span>ComUsr_P01TxCounter<span class="token punctuation">,</span> <span class="token punctuation">(</span>PduInfoPtr<span class="token operator">-&gt;</span>SduDataPtr<span class="token operator">+</span><span class="token punctuation">(</span><span class="token number">8</span> <span class="token operator">*</span> Loc_u8IsCrcByte<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+   <span class="token comment">// 2. 自己的滚动计数器加 1，告诉别人这绝对是一帧最新的报文（0~14循环）</span>
+   Stic_u8ID0x467Cntr <span class="token operator">=</span> Stic_u8ID0x467Cntr <span class="token operator">+</span> <span class="token number">1u</span><span class="token punctuation">;</span>
+   <span class="token keyword">if</span><span class="token punctuation">(</span>COMUSR_COUNTVALUE_15 <span class="token operator">==</span> Stic_u8ID0x467Cntr<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+      Stic_u8ID0x467Cntr <span class="token operator">=</span> <span class="token number">0u</span><span class="token punctuation">;</span>
+   <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>这步完成后，这帧数据就顺着 <strong>PduR -&gt; CanIf -&gt; CanDrv</strong>，最终化作物理线束上的电平信号飞向了 VCU。在应用层，我们往往只需要调用 Com_SendSignal 和 Com_ReceiveSignal。</p>
+</div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-e1cc28b339.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-d1e89cace4.css" rel="stylesheet"/>
+</div></body></html>

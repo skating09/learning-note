@@ -1,0 +1,84 @@
+<html><head><meta charset='utf-8'></head><body><div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-a50b13a894.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-dark" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p><a href="https://blog.csdn.net/weixin_45479529/article/details/145633837?sharetype=blogdetail&amp;sharerId=145633837&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">BMS1–BMS基础(硬件电路＋软件配置 原理 + 项目实例)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145689852?spm=1001.2014.3001.5501">BMS2–BMS底软HVIL (硬件电路＋软件配置 原理 + 项目实例)[万字图解 含ADC PWM Port配置及原理详解]</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/148279081?spm=1011.2124.3001.6209">BMS3–BMS充电管理(国标+原理+项目)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/145686720?sharetype=blogdetail&amp;sharerId=145686720&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar1–先导篇 AutoSar 模块及分层开发活动详解</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156234198?sharetype=blogdetail&amp;sharerId=156234198&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar2–BMS编译调试工具介绍</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158701950?spm=1011.2124.3001.6209">AutoSar3–Polyspace 代码常犯错误汇总</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/156363653?sharetype=blogdetail&amp;sharerId=156363653&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar4–AUTOSAR平台OS模块配置</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158845555?sharetype=blogdetail&amp;sharerId=158845555&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">AutoSar5–CAN通信栈(Can通讯原理+配置+实战项目需求)</a><br/> <a href="https://blog.csdn.net/weixin_45479529/article/details/158930522?sharetype=blogdetail&amp;sharerId=158930522&amp;sharerefer=PC&amp;sharesource=weixin_45479529&amp;spm=1011.2480.3001.8118">动力总成1 OBC DCDC(万字原理+BMS VCU交互+国标详解)</a></p>
+<p></p>
+<div class="toc">
+<h4>秒懂 Polyspace 静态扫描测试配置及Coding常犯错误汇总</h4>
+<ul><li><a href="#PolySpace_12">一、PolySpace静态扫描工程配置</a></li><li><a href="#Polyspace__74">二、Polyspace 常犯错误汇总</a></li><li><ul><li><a href="#1Overflow_75">1.溢出(Overflow)</a></li><li><a href="#2_Noninitialized_variable_79">2. 未初始化变量(Non-initialized variable)</a></li><li><a href="#3_Out_of_bounds_array_index_83">3. 数组索引越界(Out of bounds array index)</a></li><li><a href="#4Division_by_zero_88">4.除以零(Division by zero)</a></li><li><a href="#5_Illegally_dereferenced_pointer_94">5. 非法取消引用的指针(Illegally dereferenced pointer)</a></li></ul>
+</li><li><a href="#Klocwork__127">Klocwork 常犯错误汇总</a></li><li><ul><li><a href="#1Overflow_128">1.溢出(Overflow)</a></li><li><a href="#2Assignment_to_an_object_of_a_narrower_essential_type_or_a_different_essential_type_category_135">2.数据类型分配不一致(Assignment to an object of a narrower essential type or a different essential type category)</a></li><li><a href="#3_Nonstandard_characters_in_header_file_names_149">3. 头文件名中的非标准字符(Non-standard characters in header file names)</a></li><li><a href="#4_Identifier_name_is_too_long_154">4. 标识符名称太长(Identifier name is too long)</a></li><li><a href="#5_Function_has_a_definition_but_no_prototype_157">5. 函数没在头文件中定义(Function has a definition but no prototype)</a></li><li><a href="#6_UUnsigned_integer_literal_0x00F0_need_the_U_suffix_162">6. 无符号整数需要“U”后缀(Unsigned integer literal '0x00F0' need the 'U' suffix)</a></li><li><a href="#7_ifelseThe_body_of_ifelse_statement_is_not_a_compound_statement_165">7. 不是正规的if/else类型(The body of if/else statement is not a compound statement)</a></li><li><a href="#8_forThe_body_of_for_statement_is_not_a_compound_statement_170">8. 不是正规的for类型(The body of for statement is not a compound statement)</a></li><li><a href="#9staticstaticFunction_or_object_Eeprom_ReadArray_redeclaration_does_not_include_static_modifier_178">9.定义了static但实际没用static(Function or object 'Eeprom_ReadArray' redeclaration does not include 'static' modifier)</a></li><li><a href="#10Local_variable_FreCheckFristFinishFlag_is_never_used_183">10.定义了变量但实际未使用(Local variable 'FreCheckFristFinishFlag' is never used)</a></li><li><a href="#11SwitchdefaultEvery_switch_statement_shall_have_a_default_label_190">11.Switch语句没有default(Every switch statement shall have a default label)</a></li><li><a href="#12SwitchbreakNo_break_or_throw_statement_at_the_end_of_switchclause_199">12.Switch语句没有break(No break or throw statement at the end of switch-clause)</a></li><li><a href="#13Loss_of_Precision_222">13.在赋值过程中由于定义的变量不一致，出现丢失精度隐患(Loss of Precision)</a></li><li><a href="#14_extra_semicolon_236">14. 多一个分号(extra semicolon)</a></li></ul>
+</li><li><a href="#_254">内存分配详解</a></li></ul>
+</div>
+<p></p>
+<h2><a id="PolySpace_12"></a>一、PolySpace静态扫描工程配置</h2>
+<p>polyspace简介<br/> Polyspace是由MathWorks开发的一种软件验证工具。它旨在检测和消除C和C++编写的嵌入式软件中的运行时错误，如整数溢出、除以零和缓冲区溢出。Polyspace使用静态代码分析技术来分析源代码，并在软件执行之前识别潜在错误。它提供了一个图形界面来查看和分析分析结果，使开发人员能够快速识别和修复潜在错误。Polyspace在安全关键行业，如汽车、航空航天和医疗设备中得到了广泛应用，在这些行业中，软件可靠性至关重要</p>
+<p>静态检测工程创建<br/> <strong>1、打开polyspace软件：点击File -&gt; New Project</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/d56dc18d0496457a9bb077fb18ca824b.png"/></p>
+<p>给polyspace工程命名，选择工程文件存储位置：</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/45a0efd73f014ba7b2b12fbb3b604469.png"/></p>
+<p><strong>2、添加源文件，在工程位置右键点击-&gt; Add Source Folders</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/411802332e4641afb71b44d951f388ba.png"/></p>
+<p>跳转到选择source文件页面：<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/ccbbcbc0230c43cab8b63477f23d50a5.png"/></p>
+<p>下一步点击Add Source Folders，.c文件就会出现在左侧</p>
+<p><strong>3、添加头文件，在工程位置右键点击-&gt; Add Include Folders</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/1b8546509a674d25b01b34e4b6275e66.png"/></p>
+<p>可以事先将所有的.h文件放置在同一个文件夹，这样就只需要添加一个路径即可；</p>
+<p><strong>4、配置语言类型，编译器类型</strong><br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/b0d2294d3a204685931caedf65b7bf86.png"/></p>
+<p><strong>5、设置编译宏</strong><br/> 部分项目代码需要定义预编译的宏才可以正常分析，根据实际项目需求添加<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/c25455103dec42929d25823752a0621d.png"/></p>
+<p><strong>6、模块管理</strong><br/> Polyspace由于用Module分别单独检测，需要把对应的源文件复制到对应的Module下，这样只有在这个Module的源文件才会被这个Module检测。复制方法为：在工程界面的Source文件夹下，选择对应的文件，单机右键选择copy to：</p>
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/46e663eb54814025a3aee476a7d87206.png"/></p>
+<p>.c源文件就会出现在module_1下方</p>
+<p>进行代码检查操作步骤<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/9a1cc39797ea4f09b8b419d818aad366.png"/></p>
+<p>点击工具栏的倒三角进行选择检查方式，扫描成功后如下：<br/> <img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/direct/4fdf88f43bab43b8acc524db498be3dd.png"/></p>
+<h2><a id="Polyspace__74"></a>二、Polyspace 常犯错误汇总</h2>
+<h3><a id="1Overflow_75"></a>1.溢出(Overflow)</h3>
+<p>例子：<br/> DMA_u16TxData[2] = (uint16_t)u8AutoChnSel &lt;&lt; 8; DMA_u16TxData[0] =(uint16_t) (0x80 | (ExtAdc_u8Ads7038TxId &lt;&lt; 3)) &lt;&lt; 8; DMA_u16TxData[0] = (uint16_t)(0x80 | (ExtAdc_u8Ads7038TxId &lt;&lt; 3)) &lt;&lt; 8; DMA_u16TxData[0] = (uint16_t)(0x80 | (ExtAdc_u8Ads7038TxId &lt;&lt; 3)) &lt;&lt; 8; Uint8数据，向左移位八位并分配给Uint16数据，存在溢出风险。<br/> 这里面报了很多溢出的警告，但绝大多数都是数据类型不匹配相互赋值，或者是不匹配的数据类型进行做与或等操作。经评估没有风险不会导致溢出。</p>
+<h3><a id="2_Noninitialized_variable_79"></a>2. 未初始化变量(Non-initialized variable)</h3>
+<p>boolean_t Boost_bInputZeroLoss;<br/> Calibra_vidAcSampleValAvg(PFCCtrl_u16LineSumCnt,Boost_bInputZeroLoss);<br/> 在定义变量后需要初始化变量。</p>
+<h3><a id="3_Out_of_bounds_array_index_83"></a>3. 数组索引越界(Out of bounds array index)</h3>
+<p>例子：<br/> MailBox_Msg CanApp_aMB_Infor[CanApp_ID_IND_MAX]; CanApp_ID_IND_MAX 16<br/> CanApp_aMB_Infor[u32Rx_Tx_MB].MB_flags.bits.u16BfMB_Enable = 0;<br/> u32Rx_Tx_MB的范围为0~32，导致该值没得到适当保护。</p>
+<h3><a id="4Division_by_zero_88"></a>4.除以零(Division by zero)</h3>
+<p>uint16_t PFCCtrl_u16LineSumCnt = 0u;<br/> PFCCtrl_u16LineSumCnt = PFCCtrl_u16LineSumCntTemp;<br/> ……<br/> Boost_u16LineVoltRmsQ5 = Control_u16SqrtRoot(PFCCtrl_u64RLineVoltSum/PFCCtrl_u16LineSumCnt);<br/> 当然这里没有问题，在中断中计算后再赋值给PFCCtrl_u16LineSumCnt，再去启动过零任务计算这个除法，没有风险。</p>
+<h3><a id="5_Illegally_dereferenced_pointer_94"></a>5. 非法取消引用的指针(Illegally dereferenced pointer)</h3>
+<p>例子：<br/> uint16_t s16SoftwareStringCopy(char_t const* pchSource, char_t* pchDestination, uint16_t u16SourceLength, uint16_t<br/> u16Destistatic uint16_t CanCB_u16CanReadWord(uint16_t const pchSource[2])<br/> {<!-- --><br/> uint16_t u16Value = pchSource[0] + (pchSource[1] &lt;&lt; 8);<br/> return u16Value;<br/> }<br/> 这里是没问题的，属于一种常规数据处理方法。</p>
+<h2><a id="Klocwork__127"></a>Klocwork 常犯错误汇总</h2>
+<h3><a id="1Overflow_128"></a>1.溢出(Overflow)</h3>
+<p>将基本类型“unsigned int”的表达式值分配给基本类型“signed int”的对象<br/> 例子：<br/> struct ADC_RESULT_REGS { Uint16 ADCRESULT0; // ADC Result 0 Register<br/> static int16_t as16rawAdcI_P[2] = {0, 0};<br/> static uint16_t u16rawAdcIdx = 0;<br/> as16rawAdcI_P[u16rawAdcIdx] = AdcbResultRegs.ADCRESULT0; 这里是没问题的，因为ADCRESULT都是大于零的。</p>
+<h3><a id="2Assignment_to_an_object_of_a_narrower_essential_type_or_a_different_essential_type_category_135"></a>2.数据类型分配不一致(Assignment to an object of a narrower essential type or a different essential type category)</h3>
+<p>基本类型“Enum”的表达式值被分配给基本类型“unsigned int”的对象<br/> 例子：<br/> typedef enum<br/> {<!-- --><br/> SystemInput_InputVoltage,//32<br/> ……<br/> } SystemInput;<br/> boolean_t ADC_CalibrationAdcGainOffset(uint16_t u16Channel,uint16_t u16NewGain,int32_t s32NewOffset)<br/> {<!-- --><br/> boolean_t bResult = TRUE;<br/> switch(u16Channel)<br/> {<!-- --><br/> case SystemInput_InputVoltage ……</p>
+<h3><a id="3_Nonstandard_characters_in_header_file_names_149"></a>3. 头文件名中的非标准字符(Non-standard characters in header file names)</h3>
+<p>例子：<br/> #include “Bsw.h” 正确<br/> #include “Device\Interrupts.h” 不正确 当然这里编译正常只是WARNING</p>
+<h3><a id="4_Identifier_name_is_too_long_154"></a>4. 标识符名称太长(Identifier name is too long)</h3>
+<p>例子：<br/> #define INPUTVOLTAGE_MINIMUM_SHUTDOWNBELOW_75V 75 这里编译正常只是WARNING</p>
+<h3><a id="5_Function_has_a_definition_but_no_prototype_157"></a>5. 函数没在头文件中定义(Function has a definition but no prototype)</h3>
+<p>例子：<br/> 函数：void InputDetectPeakValue(int16_t s16Input)<br/> 调用：InputDetectPeakValue(s16PrimaryVQ5);<br/> 需在头文件Control.h中增加： extern void sLineRmsCompensation(int16_t s16Input); 运行没问题</p>
+<h3><a id="6_UUnsigned_integer_literal_0x00F0_need_the_U_suffix_162"></a>6. 无符号整数需要“U”后缀(Unsigned integer literal ‘0x00F0’ need the ‘U’ suffix)</h3>
+<p>例子：<br/> u16AdcPara[u16CalibraIndex].u16CalibraCnt |= 0x00F0 0x00F0U; 编程规则</p>
+<h3><a id="7_ifelseThe_body_of_ifelse_statement_is_not_a_compound_statement_165"></a>7. 不是正规的if/else类型(The body of if/else statement is not a compound statement)</h3>
+<p>例子：<br/> void InputDetectPeakValue(int16_t s16Input)<br/> if( s32ErrTemp &lt; 0 )<br/> s16Gain =1; 没有加括号，没有else语句</p>
+<h3><a id="8_forThe_body_of_for_statement_is_not_a_compound_statement_170"></a>8. 不是正规的for类型(The body of for statement is not a compound statement)</h3>
+<p>static void initPie_system(void)<br/> {……<br/> EALLOW;<br/> for (i=0; i &lt; 211; i++) *Dest++ = &amp;INT_ILLEGALISR; 没有加括号<br/> EDIS;<br/> ……<br/> }</p>
+<h3><a id="9staticstaticFunction_or_object_Eeprom_ReadArray_redeclaration_does_not_include_static_modifier_178"></a>9.定义了static但实际没用static(Function or object ‘Eeprom_ReadArray’ redeclaration does not include ‘static’ modifier)</h3>
+<p>例子：<br/> 需在头文件中定义函数：static void Eeprom_UpdateDiagnosis(void);<br/> 函数：void Eeprom_UpdateDiagnosis(void){……}<br/> 调用函数： Eeprom_UpdateDiagnosis();</p>
+<h3><a id="10Local_variable_FreCheckFristFinishFlag_is_never_used_183"></a>10.定义了变量但实际未使用(Local variable ‘FreCheckFristFinishFlag’ is never used)</h3>
+<p>例子：<br/> void vidCheck_InputFrequency(uint16_t u16InputFreqM10)<br/> {……<br/> static int16_t FreCheckFristFinishFlag = 0;<br/> ……<br/> }</p>
+<h3><a id="11SwitchdefaultEvery_switch_statement_shall_have_a_default_label_190"></a>11.Switch语句没有default(Every switch statement shall have a default label)</h3>
+<p>例子：<br/> switch (u16taskIdx)<br/> {<!-- --><br/> case TASK_1MS_GROUP_1: // Called every 2ms<br/> break;<br/> case TASK_1MS_GROUP_2: // Called every 4ms<br/> break;<br/> }</p>
+<h3><a id="12SwitchbreakNo_break_or_throw_statement_at_the_end_of_switchclause_199"></a>12.Switch语句没有break(No break or throw statement at the end of switch-clause)</h3>
+<p>例子：<br/> switch(u16SystemControl)<br/> {<!-- --><br/> case ENABLE_CCCHARGING:<br/> u64ACOCPRecoverTimer = Timer_u64Get1msTimerTick();<br/> 这里没有break结尾<br/> case ENABLE_CVCHARGING:<br/> if(u16InputCurrRMS &lt; AC_CURRENT_3A)<br/> {<!-- --><br/> if (Timer_bIsElasped(u64ACOCPRecoverTimer, SAFETY_ACOCP_RECOVER_PERIOD))<br/> {<!-- --><br/> vidSetAlarmBit(AlarmBit_SWOCP, FALSE);<br/> }<br/> else<br/> {<!-- --><br/> u64ACOCPRecoverTimer = Timer_u64Get1msTimerTick();<br/> }<br/> break;<br/> default:<br/> ……<br/> break;<br/> }</p>
+<h3><a id="13Loss_of_Precision_222"></a>13.在赋值过程中由于定义的变量不一致，出现丢失精度隐患(Loss of Precision)</h3>
+<p>例子：<br/> uint32_t Control_u16GetBusVoltage(void)<br/> {<!-- --><br/> return (u16BoostVoltAvgQ5 &gt;&gt; 5);//debug<br/> }<br/> uint16_t Database_u16GetBatVoltage(void)<br/> {<!-- --><br/> uint16_t u16Return;<br/> u16Return = Control_u16GetBusVoltage();<br/> return u16Return;<br/> }<br/> 当然这个地方已经有考虑，没有风险</p>
+<h3><a id="14_extra_semicolon_236"></a>14. 多一个分号(extra semicolon)</h3>
+<pre><code>while (Eeprom_u16GetEepromTaskState() != EEPROM_SUSPENDING);
+{
+ }
+</code></pre>
+<p>由于函数是空，没有影响。</p>
+<ol start="15"><li>Number of return points shall not greater than 1;</li><li>Max nesting level shall not greater than 4;</li><li>Local function identifier name shall not exceed 31 characters;</li><li>Identifier name should be between 3 and 31 characters;</li><li>The first character for Global function ‘initECAN’ must be an upper-case letter;</li><li>In Global function descriptive body shall follow upper camel case (2 conseccutive capital letters are not allowed);</li><li>The first character for Global function must be an upper-case letter;</li><li>Structure typename ‘tstrSupervisedEntity’ should start with a upper case letter;</li><li>In Type Field and Descriptive Body for global function ‘Database_u32GetBat3_1Voltage’ the underscores are forbidden.</li></ol>
+<h2><a id="_254"></a>内存分配详解</h2>
+<p>https://mp.weixin.qq.com/s/1xnfEdzDr6rrnVnKTVvl2w</p>
+</div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-e1cc28b339.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-d1e89cace4.css" rel="stylesheet"/>
+</div></body></html>
